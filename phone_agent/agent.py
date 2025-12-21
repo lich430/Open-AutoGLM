@@ -289,12 +289,14 @@ class PhoneAgent:
         x, y = float(pt[0]), float(pt[1])
         dx = self.rand_offset_1_5_float2(allow_negative)
         dy = self.rand_offset_1_5_float2(allow_negative)
-        return [round(x + dx, 1), round(y + dy, 1)]
+        return [round(x + dx, 2), round(y + dy, 2)]
 
     def rand_offset_1_5_float2(self,allow_negative: bool = True) -> float:
         """生成 1~5 的随机浮点偏移，保留两位小数；默认允许正负。"""
-        val = round(random.uniform(0.1, 2), 1)
+        val = round(random.uniform(0.01, 0.1), 2)
         if allow_negative:
-            val *= -1
-            val = round(val, 1)
-        return val
+            sign = -1 if random.getrandbits(1) else 1
+            val *= sign
+            val = round(val, 2)
+        # return val
+        return 0
