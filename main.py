@@ -4,6 +4,7 @@ import uiautomator2 as u2
 import urllib.request
 import json
 import time
+import os
 from phone_agent import PhoneAgent
 from phone_agent.model import ModelConfig
 import prompt
@@ -67,4 +68,4 @@ def main(serial:str, label:str, otp:str, money):
         # TODO::
 
 if __name__ == "__main__":
-    main("ADFDU19C09011579", "", "", 10)
+    main(os.environ["SERIAL"], "", "", 10)
