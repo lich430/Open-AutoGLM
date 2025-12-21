@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from runner import AutoGLMRunner
+import io
+import contextlib
+import re
 
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
@@ -80,6 +83,35 @@ def task_watch_live(runner: AutoGLMRunner):
     prompt = """1. 打开币安app 进入首页 2. 点击下方'直播'按钮  进入后向下持续滑动浏览 滑动尽量快速些 3. 进入一个直播间 在里面不操作任何内容 待够5分钟左右 然后退出直播间 持续下滑一会 然后重复上面操作5次"""
     runner.run(prompt)
 
+# 获取交易金额：
+
+def run_and_capture_prints(runner, prompt: str):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        result = runner.run(prompt)   # runner.run 原本会 print，这里会被写入 buf
+    logs = buf.getvalue()
+    return result, logs
+
+def extract_trade_volume(logs: str):
+    # 你提示词里要求输出形如：ssss111.58eeee
+    m = re.search(r"ssss\s*([0-9]+(?:\.[0-9]+)?)\s*eee+e", logs)
+    if not m:
+        return None
+    return float(m.group(1))
+
+# 使用示例
+def task_get_alpha_estimated_volume(runner):
+    task_return_homepage(runner)
+
+    prompt = """1. 打开币安app进入首页 2. 首页的左上方有三道横杠,点进去后页面你会看到下方的更多服务四个字的按钮 3. 点击更多服务进入服务页面服务页面上方有个搜索框搜索alpha活动，搜到后点击alpha活动 4.向下滑动alpha页面，会看到今天的交易量预估。在交易额数字的前方添加ssss交易和的尾部添加eee，然后输出它，例如ssss111.58eeee, 然后点击左上角的返回箭头，退回至服务页面 5.如果已经在服务页面，继续点击左上角的返回箭头退回至个人中心，6.如果已经在个人中心页面，继续点击左上角的返回箭头退回币安app的主页"""
+
+    result, logs = run_and_capture_prints(runner, prompt)
+
+    volume = extract_trade_volume(logs)
+    print("捕获到的volume:", volume)
+    # 你也可以把 logs 存文件，或进一步解析
+    return volume
+
 
 def main():
     runner = AutoGLMRunner()
@@ -100,7 +132,10 @@ def main():
     # task_enter_futures_usdt(runner)
     #
     # # 逛广场
-    task_browse_square(runner)
+    #task_browse_square(runner)
+
+    volume = task_jiaoyiliang(runner)
+    print(f"volume:{volume}")
 
     # #看直播
     # task_watch_live(runner)
