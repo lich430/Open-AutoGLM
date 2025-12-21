@@ -71,7 +71,7 @@ def task_enter_futures_usdt(runner: PhoneAgent):
 def task_browse_square(runner: PhoneAgent):
     task_return_homepage(runner)
 
-    prompt = """1. 打开币安app 进入首页 2. 点击发现底部发现按钮 进入发现页面 向下滑动浏览 滑动尽量快速些 3. 滑动过3-5个帖子后 先点击帖子的文字进入帖子(不要点击图片进入)  进入帖子后快速下滑浏览 4. 如过帖子里有其他人评论的话 对这个帖子进行点赞  并在左下角输入 赞 取消勾选'评论并转发'(前面不要打钩) 点击发送  如过弹出仅限关注才能回复 就选择 取消并返回发现页 如过不提示就点击发送  完成后返回发现页  然后重复上面的操作5次"""
+    prompt = """1. 打开币安app 进入首页 2. 点击发现底部发现按钮 进入发现页面 向下滑动浏览 滑动尽量快速些 3. 滑动过3-10个帖子后 先点击帖子的文字进入帖子(不要点击图片进入)  进入帖子后快速下滑浏览 4. 如过帖子里有其他人评论的话 对这个帖子进行点赞  并根据文章文字的内容做出回复，把要回复的从容左下角输入  取消勾选'评论并转发'(前面不要打钩) 点击发送  如过弹出仅限关注才能回复 就选择 取消并返回发现页 如过不提示就点击发送  完成后返回发现页 。完成1次评论后后结束任务"""
     runner.run(prompt)
 
 
@@ -89,7 +89,7 @@ def main():
     # # alpha交易相关的
     # #
     # task_enter_alpha_trade(runner, "RLS")
-    task_reset_alpha_trade_page(runner)
+    # task_reset_alpha_trade_page(runner)
 
     # task_place_alpha_buy_order(runner,"TTD")
 
@@ -102,7 +102,7 @@ def main():
     # task_enter_futures_usdt(runner)
     #
     # # 逛广场
-    # task_browse_square(runner)
+    task_browse_square(runner)
 
     # #看直播
     # task_watch_live(runner)
