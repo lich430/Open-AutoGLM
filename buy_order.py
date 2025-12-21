@@ -159,7 +159,6 @@ class CoinOrder:
         self.screen_width, self.screen_height = self.device.window_size()
         self.serial = device._serial
         self.taskCounter = TaskCounter(otp)
-        os.chdir("/Users/jessinio/env")
 
     def GetOrderPageButton(self):
         # 获取当前界面的层级结构
