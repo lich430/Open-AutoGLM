@@ -848,6 +848,69 @@ def main():
             except Exception as e:
                 print(f"\nError: {e}\n")
 
+import os
+import requests
+from typing import Optional
+
+
+def glm_chat_content(
+    user_content: str,
+    *,
+    api_key: Optional[str] = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe",
+    model: str = "glm-4.6",
+    temperature: float = 1.0,
+    top_p: float = 0.95,
+    timeout: int = 60,
+) -> str:
+    """
+    调用智谱 open.bigmodel.cn 的 chat/completions 接口，返回 choices[0].message.content
+
+    环境变量方式：
+      setx BIGMODEL_API_KEY "你的key"   (Windows CMD)
+      或 PowerShell: [Environment]::SetEnvironmentVariable("BIGMODEL_API_KEY","你的key","User")
+    """
+    if not api_key:
+        raise ValueError("缺少 API Key：请传入 api_key 参数或设置环境变量 BIGMODEL_API_KEY")
+
+    url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": user_content}],
+        "temperature": temperature,
+        "stream": False,
+        "thinking": {"type": "enabled"},
+        "do_sample": True,
+        "top_p": top_p,
+        "tool_stream": False,
+        "response_format": {"type": "text"},
+    }
+
+    resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
+
+    # 非 2xx 直接抛出异常，方便你看到服务端返回的错误信息
+    try:
+        resp.raise_for_status()
+    except requests.HTTPError as e:
+        raise RuntimeError(f"HTTP {resp.status_code}: {resp.text}") from e
+
+    data = resp.json()
+
+    # 兼容性/健壮性检查
+    choices = data.get("choices")
+    if not choices:
+        raise RuntimeError(f"响应缺少 choices：{data}")
+
+    message = choices[0].get("message") or {}
+    content = message.get("content")
+    if content is None:
+        raise RuntimeError(f"响应缺少 message.content：{data}")
+
+    return content
+
 
 if __name__ == "__main__":
     main()

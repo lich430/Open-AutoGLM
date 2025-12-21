@@ -1,6 +1,7 @@
 """Main PhoneAgent class for orchestrating phone automation."""
 
 import json
+import random
 import traceback
 from dataclasses import dataclass
 from typing import Any, Callable
@@ -189,6 +190,36 @@ class PhoneAgent:
         # Parse action from response
         try:
             action = parse_action(response.action)
+            # 只对 Tap 动作做坐标扰动
+            if isinstance(action, dict):
+                act = action.get("action")
+
+                # Tap: element=[x,y]
+                if act == "Tap":
+                    elem = action.get("element")
+                    if (
+                            isinstance(elem, (list, tuple)) and len(elem) == 2
+                            and all(isinstance(v, (int, float)) for v in elem)
+                    ):
+                        action["element"] = self.jitter_point(elem, allow_negative=True)
+
+                # Swipe: start=[x,y], end=[x,y]
+                elif act == "Swipe":
+                    start = action.get("start")
+                    end = action.get("end")
+
+                    if (
+                            isinstance(start, (list, tuple)) and len(start) == 2
+                            and all(isinstance(v, (int, float)) for v in start)
+                    ):
+                        action["start"] = self.jitter_point(start, allow_negative=True)
+
+                    if (
+                            isinstance(end, (list, tuple)) and len(end) == 2
+                            and all(isinstance(v, (int, float)) for v in end)
+                    ):
+                        action["end"] = self.jitter_point(end, allow_negative=True)
+            print(f"hyper byte print: {action}")
         except ValueError:
             if self.agent_config.verbose:
                 traceback.print_exc()
@@ -251,3 +282,19 @@ class PhoneAgent:
     def step_count(self) -> int:
         """Get the current step count."""
         return self._step_count
+
+
+    def jitter_point(self, pt, allow_negative: bool = True):
+        """对 [x, y] 做随机扰动，返回 [new_x, new_y]（两位小数）。"""
+        x, y = float(pt[0]), float(pt[1])
+        dx = self.rand_offset_1_5_float2(allow_negative)
+        dy = self.rand_offset_1_5_float2(allow_negative)
+        return [round(x + dx, 1), round(y + dy, 1)]
+
+    def rand_offset_1_5_float2(self,allow_negative: bool = True) -> float:
+        """生成 1~5 的随机浮点偏移，保留两位小数；默认允许正负。"""
+        val = round(random.uniform(0.1, 2), 1)
+        if allow_negative:
+            val *= -1
+            val = round(val, 1)
+        return val
