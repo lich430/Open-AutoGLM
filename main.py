@@ -30,7 +30,7 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
             result = prompt.task_reset_alpha_trade_page(llvmAgent)
             while True:
                 prompt.task_cancel_alpha_orders(llvmAgent)
-                orderClient.BuyOrderAction()
+                orderClient.BuyOrderAction(coinName)
                 time.sleep(5)
                 newCoinName = GetStabilityCoinNameRequest()
                 # 去逛广场

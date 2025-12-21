@@ -6,7 +6,6 @@ import random
 import select
 from xml.etree import ElementTree as ET
 import json
-import os
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -155,10 +154,17 @@ class CoinOrder:
         self.label = label
         self.otp = otp
         self.money = money
+        self.isFourTimes = False
+        self.coinName = ""
         self.totalDeal = 0
         self.screen_width, self.screen_height = self.device.window_size()
         self.serial = device._serial
         self.taskCounter = TaskCounter(otp)
+        if label != "":
+            ClientLogWriter("用户指定稳定币:" + label)
+            if label.endswith("|4"):
+                self.isFourTimes = True
+            self.coinName = label.strip("|4")
 
     def GetOrderPageButton(self):
         # 获取当前界面的层级结构
@@ -287,7 +293,7 @@ class CoinOrder:
         cachedData["cash"] = cash
         self.taskCounter.save(cachedData)
 
-    def BuyOrderAction(self):
+    def BuyOrderAction(self, coinName:str):
         # 快速下拉
         self.QuickRollDown()
         self.Sleep(1)
@@ -329,8 +335,12 @@ class CoinOrder:
             print("买单 确认 未完成")
             return False
         # self.Click(self.orderPageButton.actionButton)
-        self.totalDeal += money
-        self.taskCounter.inc("cash", money)
+
+        if (coinName == self.coinName) and (not self.isFourTimes):
+            self.totalDeal += money
+        else:
+            self.totalDeal += money*4
+            self.taskCounter.inc("cash", money*4)
         print("买单 确认 完成")
         return True
 
