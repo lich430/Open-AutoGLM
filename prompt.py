@@ -24,7 +24,7 @@ def task_enter_alpha_trade(runner: PhoneAgent, symbol: str):
 
 # 重置alpha交易页面设置:
 def task_reset_alpha_trade_page(runner: PhoneAgent):
-    prompt = """当前页面是alpah交易的页面  1：交易模式选择限价模式。2：交易方向选择买入: 在页面的上半部分你会发现有买入和卖出两个按钮，点击买入行按钮，不要点击卖出行按钮。3：如果反向订单复选框没有被勾选，就勾选它"""
+    prompt = """当前页面是alpah交易的页面  1：交易模式选择限价模式。2：交易方向选择买入: 在页面的上半部分你会发现有买入和卖出两个按钮，点击买入行按钮，不要点击卖出行按钮。"""
     runner.run(prompt)
 
 
