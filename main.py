@@ -33,9 +33,12 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
                 orderClient.BuyOrderAction()
                 time.sleep(5)
                 newCoinName = GetStabilityCoinNameRequest()
-                # TODO::更换币种，或者去逛广场
-                if coinName != newCoinName:
+                # 去逛广场
+                if newCoinName == "":
                     return
+                # TODO::更换币种
+                # if coinName != newCoinName:
+                #     return
     else:
         # 调用LLVM跳转到交易额页面
         # TODO::
