@@ -63,6 +63,8 @@ def main(serial:str, label:str, otp:str, money):
         # 进入交易页面
         PlayDealTask(orderClient, llvmAgent)
         time.sleep(2)
+        # 返回手机的首页，防止占用手机时间
+        # TODO::
 
 if __name__ == "__main__":
     main("ADFDU19C09011579", "", "", 10)

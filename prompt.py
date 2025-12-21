@@ -32,7 +32,6 @@ def task_reset_alpha_trade_page(runner: PhoneAgent):
 def task_place_alpha_buy_order(runner: PhoneAgent, symbol: str):
     task_cancel_alpha_orders(runner)
 
-<<<<<<< HEAD:prompt.py
     prompt = f"""当前是alpha交易页面，1: 页面上有建议价格的的内容，例如[建议价格 xxxxxxx],你帮我点击xxxxxxx这个数字位置。目前发现你点击的位置偶尔不对，所以你需要把获取位置之后点击xxxxxxx重复3次。2: 在当前页面有可用资金的数据，不允许你点击[可用资金 XXXXXXXX]这个数据区域也不要点击该数据后面的加号。把该可用资金保留两位有效小数填入 总额(USDT)输入框。3: 页面上有建议价格A。获取价格B=A*0.95,把价格B填入反向订单复选框下方的 卖出价格(USDT) 输入框, 4: 任务1,2,3都完成后点击 买入 {symbol} 按钮执行买入，弹出确认框时你需要点击确认按钮。"""
     runner.run(prompt)
 
@@ -41,17 +40,6 @@ def task_place_alpha_buy_order(runner: PhoneAgent, symbol: str):
 def task_cancel_alpha_orders(runner: PhoneAgent):
     prompt = """当前页面是alpah交易的页面,千万不要点击反向订单那个复选框, 仅限于下方的【当前委托】才能确定是否已经有有订单，千万不要傻傻的去点击反向订单。 如果页面上看不到当前委托你就向下滑动页面，看到当前委托后下方的内容后如果发现有未完成的委托单就取消所有的单子，取消完成后向连续上滑动页面到顶部"""
     runner.run(prompt)
-=======
-    prompt = f"""当前是alpha交易页面，1: 页面上有建议价格的的内容，例如[建议价格 xxxxxxx],你帮我点击建议价格的中间位置。 2: 在当前页面有可用资金的数据不允许你点击[可用资金 XXXXXXXX]这个数据区域，也不要点击该数据后面的加号。把该可用资金保留两位有效小数填入 总额(USDT)输入框。3: 页面上有建议价格A。获取价格B=A*0.95,把价格B填入反向订单复选框下方的 卖出价格(USDT) 输入框, 4: 任务1,2,3都完成后点击 买入 {symbol} 按钮执行买入，弹出确认框时你需要点击确认按钮。"""
-    runner.run(prompt, device_id="")
-
-
-# 取消alpha订单：
-def task_cancel_alpha_orders(runner: AutoGLMRunner):
-    prompt = """当前页面是alpah交易的页面,1:向下滑动页面,滑动起点在需要页面的下半部分。2：查看[当前委托]的内容，如果有未完成的委托单就取消所有的单子。3：取消完成后向连续上滑动页面到顶部"""
-    runner.run(prompt, device_id="")
->>>>>>> origin/main:main.py
-
 
 
 # 点击alpha交易页面的组件：
