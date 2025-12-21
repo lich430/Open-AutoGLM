@@ -10,7 +10,7 @@ from runner import AutoGLMRunner
 import prompt
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
-
+lastCoinName = ""
 
 def GetStabilityCoinNameRequest():
     with urllib.request.urlopen(StabilityServiceUrl) as response:
@@ -22,26 +22,23 @@ def GetStabilityCoinNameRequest():
         return "NIGHT"
 
 def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
+    global lastCoinName
     if True:#not orderClient.IsFinish():
         coinName = GetStabilityCoinNameRequest()
+
         print(f"coinName: {coinName}")
         if coinName != "":
-            # 调用LLVM跳转到交易页面
-            result = prompt.task_enter_alpha_trade(llvmAgent, coinName)
-            result = prompt.task_reset_alpha_trade_page(llvmAgent)
-            while True:
-                prompt.task_cancel_alpha_orders(llvmAgent)
-                orderClient.BuyOrderAction(coinName)
-                time.sleep(5)
-                if orderClient.IsFinish():
-                    return
-                newCoinName = GetStabilityCoinNameRequest()
-                # 去逛广场
-                if newCoinName == "":
-                    return
-                # TODO::更换币种
-                # if coinName != newCoinName:
-                #     return
+            # 如果最最新的代币和上一次的不一样，就需要重新进入交易页面, 或者直接在交易页面切换币种
+            if lastCoinName != coinName:
+                prompt.task_enter_alpha_trade(llvmAgent, coinName)
+                prompt.task_reset_alpha_trade_page(llvmAgent)
+                lastCoinName = coinName
+
+            prompt.task_cancel_alpha_orders(llvmAgent)
+            orderClient.BuyOrderAction(coinName)
+            time.sleep(5)
+            if orderClient.IsFinish():
+                return
     else:
         # 调用LLVM跳转到交易额页面
         # TODO::
