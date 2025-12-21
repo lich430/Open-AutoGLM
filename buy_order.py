@@ -1,3 +1,4 @@
+import os
 import time
 from datetime import datetime, timezone
 from typing import List, Tuple,Dict, Any, Optional, Union
@@ -180,9 +181,14 @@ class CoinOrder:
         print("卖出价格坐标:", sellPricePoint)
         self.orderPageButton = OrderPageButton(pricePoint, sellPricePoint, volumePoint, actionButton)
 
-    def Sleep(self, seconds:float|int):
+    def Sleep(self, seconds: float | int):
         seconds = seconds + random.randint(0, 1000) * 0.001
-        select.select([], [], [],seconds)
+
+        # 判断操作系统，Windows 使用 time.sleep，其他系统使用 select.select
+        if os.name == 'nt':  # Windows 系统
+            time.sleep(seconds)
+        else:  # 非 Windows 系统（Linux, macOS 等）
+            select.select([], [], [], seconds)
 
     def ShortRollUp(self):
         screen_width, screen_height = self.device.window_size()
@@ -326,7 +332,7 @@ class CoinOrder:
 
         # 触发交易
         self.Click(self.orderPageButton.actionButton)
-        self.Sleep(2)
+        self.Sleep(3)
 
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
@@ -334,7 +340,7 @@ class CoinOrder:
         if len(point) == 0:
             print("买单 确认 未完成")
             return False
-        # self.Click(self.orderPageButton.actionButton)
+        self.Click(self.orderPageButton.actionButton)
 
         if (coinName == self.coinName) and (not self.isFourTimes):
             self.totalDeal += money

@@ -5,8 +5,8 @@ import urllib.request
 import json
 import time
 import os
-from phone_agent import PhoneAgent
-from phone_agent.model import ModelConfig
+
+from runner import AutoGLMRunner
 import prompt
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
@@ -19,11 +19,12 @@ def GetStabilityCoinNameRequest():
         if len(coinList) > 0:
             TargetCoinName = coinList[0]
             return TargetCoinName
-        return ""
+        return "NIGHT"
 
-def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
-    if not orderClient.IsFinish():
+def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
+    if True:#not orderClient.IsFinish():
         coinName = GetStabilityCoinNameRequest()
+        print(f"coinName: {coinName}")
         if coinName != "":
             # 调用LLVM跳转到交易页面
             result = prompt.task_enter_alpha_trade(llvmAgent, coinName)
@@ -46,20 +47,12 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
         # TODO::
         pass
 
-def WalkPlazaTask(llvmAgent: PhoneAgent):
+def WalkPlazaTask(llvmAgent: AutoGLMRunner):
     prompt.task_browse_square(llvmAgent)
 
-def GetLLVMAgent() -> PhoneAgent:
-    # Configure model
-    model_config = ModelConfig(
-        base_url="https://open.bigmodel.cn/api/coding/paas/v4",
-        model_name="autoglm-phone",
-        api_key="a8a74eb5e1f743579653310c73baa255.ACXboMXfiBpXUhEE",
-    )
+def GetLLVMAgent() -> AutoGLMRunner:
 
-    # 创建 Agent
-    agent = PhoneAgent(model_config=model_config)
-    return agent
+    return AutoGLMRunner()
 
 def main(serial:str, label:str, otp:str, money):
     # 设备配置
