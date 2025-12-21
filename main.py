@@ -30,18 +30,24 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
             result = prompt.task_reset_alpha_trade_page(llvmAgent)
             while True:
                 prompt.task_cancel_alpha_orders(llvmAgent)
-                orderClient.BuyOrderAction()
+                orderClient.BuyOrderAction(coinName)
                 time.sleep(5)
-                newCoinName = GetStabilityCoinNameRequest()
-                if coinName != newCoinName:
+                if orderClient.IsFinish():
                     return
+                newCoinName = GetStabilityCoinNameRequest()
+                # 去逛广场
+                if newCoinName == "":
+                    return
+                # TODO::更换币种
+                # if coinName != newCoinName:
+                #     return
     else:
         # 调用LLVM跳转到交易额页面
         # TODO::
         pass
 
-def WalkPlazaTask():
-    pass
+def WalkPlazaTask(llvmAgent: PhoneAgent):
+    prompt.task_browse_square(llvmAgent)
 
 def GetLLVMAgent() -> PhoneAgent:
     # Configure model
@@ -66,8 +72,7 @@ def main(serial:str, label:str, otp:str, money):
 
     while True:
         # 逛广场
-        # TODO::
-        WalkPlazaTask()
+        WalkPlazaTask(llvmAgent)
 
         # 进入交易页面
         PlayDealTask(orderClient, llvmAgent)
