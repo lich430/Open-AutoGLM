@@ -61,6 +61,10 @@ def main(serial:str, label:str, otp:str, money):
     llvmAgent = GetLLVMAgent()
 
     while True:
+        # todo
+        estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
+        print(f"获取预估的交易量: {estimated_volume}")
+
         # 逛广场
         WalkPlazaTask(llvmAgent)
 
