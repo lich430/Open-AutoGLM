@@ -28,7 +28,13 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: PhoneAgent):
             # 调用LLVM跳转到交易页面
             result = prompt.task_enter_alpha_trade(llvmAgent, coinName)
             result = prompt.task_reset_alpha_trade_page(llvmAgent)
-            orderClient.BuyOrderAction()
+            while True:
+                prompt.task_cancel_alpha_orders(llvmAgent)
+                orderClient.BuyOrderAction()
+                time.sleep(5)
+                newCoinName = GetStabilityCoinNameRequest()
+                if coinName != newCoinName:
+                    return
     else:
         # 调用LLVM跳转到交易额页面
         # TODO::
