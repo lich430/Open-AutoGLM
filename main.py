@@ -59,6 +59,7 @@ def main(serial:str, label:str, otp:str, money):
 
     while True:
         # 逛广场
+        # TODO::
         WalkPlazaTask()
 
         # 进入交易页面
