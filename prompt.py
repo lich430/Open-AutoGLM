@@ -39,7 +39,7 @@ def task_place_alpha_buy_order(runner: AutoGLMRunner, symbol: str):
 
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
-    prompt = """当前是币安app的alpha交易页面,1:向下滑动二次，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后，向连续上滑动三次到页面顶部"""
+    prompt = """当前是币安app的alpha交易页面,1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
     runner.run(prompt)
 
 
@@ -120,8 +120,8 @@ def main():
     # #
     # task_enter_alpha_trade(runner, "RLS")
     # task_reset_alpha_trade_page(runner)
-
-    task_place_alpha_buy_order(runner,"NIGHT")
+    task_cancel_alpha_orders(runner)
+    #task_place_alpha_buy_order(runner,"NIGHT")
 
     # # 获取alpha交易页面的数据
     # task_get_alpha_latest_price(runner)
