@@ -6,8 +6,15 @@ import io
 import contextlib
 import re
 
+def task_switch_to_exchange(runner: AutoGLMRunner):
+
+    prompt = """页面顶部有两个按钮分别是 交易平台和钱包， 如果交易平台不是被选中的状态，就点击它，如果交易平台是被选中的白色背景那就什么也不做"""
+    runner.run(prompt)
+
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
+    task_switch_to_exchange(runner)
+
     prompt = """打开币安APP 1:APP首页底部有一个导航栏，导航栏有5个选项分别是首页,行情，交易，合约，资产。首页选项是被选中时就是已经在首页了，2: 如果是在首页了什么都不用做，如果不是首页并且页面的左上角有返回箭头,点击返回箭头返回上级页面，在新的页面继续点击返回箭头，击直到最新页面底部有导航栏，点击底部导航栏的首页选项进入首页。"""
     runner.run(prompt)
 
@@ -25,7 +32,7 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
 
 # 重置alpha交易页面设置:
 def task_reset_alpha_trade_page(runner: AutoGLMRunner):
-    prompt = """当前页面是币安app的alpah交易的页面  1：交易模式选择限价模式。2：交易方向选择买入: 在页面的偏上的位置，你会发现有买入和卖出两个并排在一起的按钮一左一右，点击左侧的 买入 按钮，不要点击右侧 卖出 按钮。"""
+    prompt = """当前页面是币安app的alpah交易的页面  1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
     runner.run(prompt)
 
 
@@ -122,10 +129,12 @@ def task_get_alpha_estimated_volume(runner):
 def main():
     runner = AutoGLMRunner()
 
+    # task_switch_to_exchange(runner)
+
     # # alpha交易相关的
     # #
     # task_enter_alpha_trade(runner, "RLS")
-    # task_reset_alpha_trade_page(runner)
+    task_reset_alpha_trade_page(runner)
     # task_cancel_alpha_orders(runner)
     #task_place_alpha_buy_order(runner,"NIGHT")
 
@@ -140,8 +149,8 @@ def main():
     # # 逛广场
     #task_browse_square(runner)
 
-    volume = task_get_alpha_estimated_volume(runner)
-    print(f"volume:{volume}")
+    # volume = task_get_alpha_estimated_volume(runner)
+    # print(f"volume:{volume}")
 
     # #看直播
     # task_watch_live(runner)
