@@ -30,7 +30,7 @@ class TaskCounter:
     """
     DEFAULT_FORMAT = "%Y-%m-%d"          # 按天刷新，可改成 "%Y-%m" 等
     DEFAULT_CACHE_DIR  = Path("cache")
-    DEFAULT_FILENAME_TPL = "task_counter{secret}.json"
+    DEFAULT_FILENAME_TPL = "task_counter_{secret}.json"
 
     def __init__(
         self,
@@ -160,7 +160,7 @@ class CoinOrder:
         self.totalDeal = 0
         self.screen_width, self.screen_height = self.device.window_size()
         self.serial = device._serial
-        self.taskCounter = TaskCounter(otp)
+        self.taskCounter = TaskCounter(self.serial)
         if label != "":
             ClientLogWriter("用户指定稳定币:" + label)
             if label.endswith("|4"):
