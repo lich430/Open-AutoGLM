@@ -340,7 +340,7 @@ class CoinOrder:
         if len(point) == 0:
             print("买单 确认 未完成")
             return False
-        self.Click(self.orderPageButton.actionButton)
+        self.Click(point)
 
         if (coinName == self.coinName) and (not self.isFourTimes):
             self.totalDeal += money

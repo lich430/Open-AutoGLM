@@ -8,7 +8,7 @@ import re
 
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
-    prompt = """返回币安app的首页。首页底部有一个导航栏，导航栏的第一个菜单就是首页二字,点击首页二字后所在的页面就是首页"""
+    prompt = """打开币安APP 1:APP首页底部有一个导航栏，导航栏有5个选项分别是首页,行情，交易，合约，资产。点击首页选项进入APP的首页，2: 如果页面的底部的没有5个导航栏[首页,行情，交易，合约，资产]，点击左上角的返回箭头，返回上级页面后重复点击左上角的返回箭头，直到最新页面左上角没有返回箭头了，点击底部导航栏的首页选项。"""
     runner.run(prompt)
 
 
@@ -25,21 +25,21 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
 
 # 重置alpha交易页面设置:
 def task_reset_alpha_trade_page(runner: AutoGLMRunner):
-    prompt = """当前页面是币安app的alpah交易的页面  1：交易模式选择限价模式。2：交易方向选择买入: 在页面的上半部分你会发现有买入和卖出两个按钮，点击买入行按钮，不要点击卖出行按钮。"""
+    prompt = """当前页面是币安app的alpah交易的页面  1：交易模式选择限价模式。2：交易方向选择买入: 在页面的偏上的位置，你会发现有买入和卖出两个并排在一起的按钮一左一右，点击左侧的 买入 按钮，不要点击右侧 卖出 按钮。"""
     runner.run(prompt)
 
 
 # 执行购买：
 def task_place_alpha_buy_order(runner: AutoGLMRunner, symbol: str):
-    task_cancel_alpha_orders(runner)
+    #task_cancel_alpha_orders(runner)
 
-    prompt = f"""当前是币安app的alpha交易页面，1: 页面上有建议价格的的内容，例如[建议价格 xxxxxxx],你帮我点击xxxxxxx这个数字位置。目前发现你点击的位置偶尔不对，所以你需要把获取位置之后点击xxxxxxx重复3次。2: 在当前页面有可用资金的数据，不允许你点击[可用资金 XXXXXXXX]这个数据区域也不要点击该数据后面的加号。把该可用资金保留两位有效小数填入 总额(USDT)输入框。3: 页面上有建议价格A。获取价格B=A*0.95,把价格B填入反向订单复选框下方的 卖出价格(USDT) 输入框, 4: 任务1,2,3都完成后点击 买入 {symbol} 按钮执行买入，弹出确认框时你需要点击确认按钮。"""
+    prompt = f"""当前是币安app的alpha交易页面，1: 最新价格的定义--在页面的右侧有一个价格列表从上倒下的顺序第1个价格就是最新价。 2：将最新价格的1.03倍填入买入价格输入框---大概位置在建议价格上方,在该输入框的内部有价格的字样点击该价格字样下方输入框的位置，触发输入光标。3.可用资金--页面上显示可用的数据，例如: 可用 XXXXXX。可用资金保留两位有效数字填入USDT总额输入框， 点击总额输入框中间的位置，触发输入光标。4: 将最新价格的0.95倍填入反向订单价格输入框---该输入框在页面上上的x轴的大概坐标范围位于 反向订单 4个字的下方和 可用 2个字的上方, 点击反向订单价格输入框中间侧的位置，触发输入光标,填入反向价格。5.最后点击页面偏下方的 买入 {symbol} 按钮, 如果弹出确认框,你需要点击确认按钮。"""
     runner.run(prompt)
 
 
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
-    prompt = """当前是币安app的alpha交易页面,1:连续向下滑动当前页面后如果页面上有 当前委托 这4个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消完成后向连续上滑动页面到顶部"""
+    prompt = """当前是币安app的alpha交易页面,1:向下滑动二次，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后，向连续上滑动三次到页面顶部"""
     runner.run(prompt)
 
 
@@ -72,7 +72,7 @@ def task_enter_futures_usdt(runner: AutoGLMRunner):
 def task_browse_square(runner: AutoGLMRunner):
     task_return_homepage(runner)
 
-    prompt = """当前是币安app,1. 点击发现底部发现按钮 进入发现页面 向下滑动浏览 滑动尽量快速些 滑动几次后 挑一个能看到文字的帖子，点击文字进入帖子(不要点击图片进入)  进入帖子后快速下滑浏览 2. 如过帖子里有其他人评论的话 对这个帖子进行点赞  并根据文章文字的内容做出回复,且内容不超过20个字，然后把要回复的从左下角输入  取消勾选'评论并转发'(前面不要打钩) 点击发送  如过弹出仅限关注才能回复 就选择 取消并返回发现页 如过不提示就点击发送  完成后返回发现页 。完成点赞或评论后返回主页并结束本次任务"""
+    prompt = """当前是币安app,1. 点击发现底部发现按钮 进入发现页面 向下滑动浏览 滑动尽量快速些 滑动几次后 挑一个能看到文字的帖子，点击文字进入帖子(不要点击图片进入)  进入帖子后快速下滑浏览 2. 如过帖子里有其他人评论的话 对这个帖子进行点赞  并根据文章文字的内容做出回复,且内容不超过20个字，然后把要回复的从左下角输入  取消勾选'评论并转发'(前面不要打钩) 点击发送  如过弹出仅限关注才能回复 就选择 取消并返回发现页 如过不提示就点击发送 。3.完成点赞或评论后，点击子页面左上角的返回箭头，返回主页并结束本次任务"""
     runner.run(prompt)
 
 
@@ -121,7 +121,7 @@ def main():
     # task_enter_alpha_trade(runner, "RLS")
     # task_reset_alpha_trade_page(runner)
 
-    # task_place_alpha_buy_order(runner,"TTD")
+    task_place_alpha_buy_order(runner,"NIGHT")
 
     # # 获取alpha交易页面的数据
     # task_get_alpha_latest_price(runner)
@@ -134,8 +134,8 @@ def main():
     # # 逛广场
     #task_browse_square(runner)
 
-    volume = task_jiaoyiliang(runner)
-    print(f"volume:{volume}")
+    # volume = task_get_alpha_estimated_volume(runner)
+    # print(f"volume:{volume}")
 
     # #看直播
     # task_watch_live(runner)

@@ -17,7 +17,7 @@ from phone_agent.model import ModelConfig
 @dataclass
 class RunnerConfig:
     base_url: str = "https://open.bigmodel.cn/api/paas/v4"
-    api_key: str = "a8a74eb5e1f743579653310c73baa255.ACXboMXfiBpXUhEE"
+    api_key: str = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
     model: str = "autoglm-phone"
     lang: str = "cn"
     max_steps: int = 20
