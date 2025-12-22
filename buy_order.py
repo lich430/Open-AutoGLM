@@ -305,9 +305,18 @@ class CoinOrder:
             ClientLogWriter("IsFinish() ==> 完成")
         return result
 
+    def IsConfirm(self) -> bool:
+        cachedData = self.taskCounter.load()
+        checked = cachedData.get("checked")
+        if checked is None:
+            return False
+        return checked
+
     def Reset(self, cash: float):
         cachedData = self.taskCounter.load()
         cachedData["cash"] = cash
+        if cash >=self.totalDeal:
+            cachedData["checked"] = True
         self.taskCounter.save(cachedData)
 
     def BuyOrderAction(self, coinName:str):

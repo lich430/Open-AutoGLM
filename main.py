@@ -25,7 +25,9 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
 
     global LastCoinName
 
-    if orderClient.IsFinish():
+    if orderClient.IsFinish() and not orderClient.IsConfirm():
+        UpdateTradeVolumeTask(orderClient,llvmAgent)
+    if orderClient.IsFinish() and orderClient.IsConfirm():
         prompt.task_browse_square(llvmAgent)
         prompt.task_watch_live(llvmAgent)
         return
