@@ -388,11 +388,6 @@ class CoinOrder:
         self.Click(points)
         self.Sleep(0.3)
         self.deviceFactory.clear_text(self.deviceId)
-        # # 全选
-        # self.device.press(123)
-        # # 删除
-        # for x in range(20):
-        #     self.device.press(67)
         # # 输入
         self.Sleep(1)
         self.deviceFactory.type_text(str(text), self.deviceId)
@@ -403,8 +398,3 @@ class CoinOrder:
         self.Click(points)
         self.Sleep(0.3)
         self.deviceFactory.clear_text(self.deviceId)
-        # # 全选
-        # self.device.press(123)
-        # # 删除
-        # for x in range(20):
-        #     self.device.press(67)
