@@ -11,6 +11,8 @@ import prompt
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
 LastCoinName = ""
+CounterOfCoinRequest = 0
+MaxRequest = 3
 
 def GetStabilityCoinNameRequest():
     with urllib.request.urlopen(StabilityServiceUrl) as response:
@@ -24,6 +26,7 @@ def GetStabilityCoinNameRequest():
 def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
 
     global LastCoinName
+    global CounterOfCoinRequest
 
     if orderClient.IsFinish() and not orderClient.IsConfirm():
         UpdateTradeVolumeTask(orderClient,llvmAgent)
@@ -35,8 +38,14 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
     coinName = GetStabilityCoinNameRequest()
     print(f"coinName: {coinName}")
     if coinName == "":
-        prompt.task_browse_square(llvmAgent)
-        return
+        CounterOfCoinRequest += 1
+        if CounterOfCoinRequest >= MaxRequest:
+            coinName = orderClient.GetDefaultCoin()
+        else:
+            prompt.task_browse_square(llvmAgent)
+            return
+    # 重置计数
+    CounterOfCoinRequest = 0
 
     # 如果最新的代币和上次选择的的不一样，就需要重新进入交易页面, todo:或者直接在交易页面切换币种
     if LastCoinName != coinName:

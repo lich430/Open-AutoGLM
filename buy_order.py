@@ -167,6 +167,9 @@ class CoinOrder:
                 self.isFourTimes = True
             self.coinName = label.strip("|4")
 
+    def GetDefaultCoin(self):
+        return self.coinName
+
     def GetOrderPageButton(self):
         # 获取当前界面的层级结构
         xml = self.device.dump_hierarchy()
