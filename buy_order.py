@@ -175,7 +175,7 @@ class CoinOrder:
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
         pricePoint = self.GetElemPointByAttribute(root, "text", "价格")
-        print("购买价格坐标:", pricePoint)
+        ClientLogWriter(f"购买价格坐标: {pricePoint}")
         # 去掉输入框内数据
         self.Click(pricePoint)
         self.Sleep(1)
@@ -185,11 +185,11 @@ class CoinOrder:
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
         volumePoint = self.GetElemPointByAttribute(root, "text", "总额(USDT)")
-        print("总额坐标:", volumePoint)
+        ClientLogWriter(f"总额坐标: {volumePoint}")
         actionButton = self.GetElemPointByAttribute(root, "text", "买入 *")
-        print("购买坐标:", actionButton)
+        ClientLogWriter(f"购买坐标: {actionButton}")
         sellPricePoint = self.GetElemPointByAttribute(root, "text", "卖出价格 (USDT)")
-        print("卖出价格坐标:", sellPricePoint)
+        ClientLogWriter(f"卖出价格坐标: {sellPricePoint}")
         self.orderPageButton = OrderPageButton(pricePoint, sellPricePoint, volumePoint, actionButton)
 
     def Sleep(self, seconds: float | int):
