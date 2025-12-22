@@ -315,7 +315,7 @@ class CoinOrder:
     def Reset(self, cash: float):
         cachedData = self.taskCounter.load()
         cachedData["cash"] = cash
-        if cash >=self.totalDeal:
+        if cash >=self.money:
             cachedData["checked"] = True
         self.taskCounter.save(cachedData)
 

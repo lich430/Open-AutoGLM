@@ -70,7 +70,7 @@ def main(serial:str, label:str, otp:str, money):
     orderClient = CoinOrder(device, label, otp, int(money))
     llvmAgent = GetLLVMAgent()
 
-    WalkPlazaTask(llvmAgent)
+    #WalkPlazaTask(llvmAgent)
 
     counter = 0
     while True:
@@ -86,4 +86,4 @@ def main(serial:str, label:str, otp:str, money):
         time.sleep(2)
 
 if __name__ == "__main__":
-    main(os.environ["SERIAL"], "", "", 200)
+    main(os.environ["SERIAL"], "", "", 10)
