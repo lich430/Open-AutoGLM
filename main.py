@@ -95,4 +95,4 @@ def main(serial:str, label:str, otp:str, money):
         time.sleep(2)
 
 if __name__ == "__main__":
-    main(os.environ["SERIAL"], "", "", 10)
+    main(os.environ["SERIAL"], "KOGE|1", "", 10)
