@@ -8,7 +8,7 @@ import re
 
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
-    prompt = """打开币安APP 1:APP首页底部有一个导航栏，导航栏有5个选项分别是首页,行情，交易，合约，资产。点击首页选项进入APP的首页，2: 如果页面的底部的没有5个导航栏[首页,行情，交易，合约，资产]，点击左上角的返回箭头，返回上级页面后重复点击左上角的返回箭头，直到最新页面左上角没有返回箭头了，点击底部导航栏的首页选项。"""
+    prompt = """打开币安APP 1:APP首页底部有一个导航栏，导航栏有5个选项分别是首页,行情，交易，合约，资产。首页选项是被选中时就是已经在首页了，2: 如果是在首页了什么都不用做，如果不是首页并且页面的左上角有返回箭头,点击返回箭头返回上级页面，在新的页面继续点击返回箭头，击直到最新页面底部有导航栏，点击底部导航栏的首页选项进入首页。"""
     runner.run(prompt)
 
 
@@ -20,7 +20,7 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
     if not symbol:
         raise ValueError("symbol 不能为空，例如 'ARTX'")
 
-    prompt = f"""进入币安的首页, 点击页面底部导航栏的行情菜单进入行情页，在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，,搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面，在K线页面的右下角你会发现一个黄色交易按钮，点击交易按钮进入alpha交易页面"""
+    prompt = f"""进入币安的首页, 点击页面底部导航栏的行情菜单进入行情页，在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，,搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面，在K线页面的右下角你会发现一个黄色交易按钮位置大概在左上角(55,315),右下角(324,353)大概这个矩形，点击交易按钮进入alpha交易页面"""
     runner.run(prompt)
 
 # 重置alpha交易页面设置:
@@ -86,6 +86,8 @@ def task_watch_live(runner: AutoGLMRunner):
 # 获取交易金额：
 
 def run_and_capture_prints(runner, prompt: str):
+    # result = runner.run(prompt)
+    # return
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         result = runner.run(prompt)   # runner.run 原本会 print，这里会被写入 buf
@@ -93,17 +95,21 @@ def run_and_capture_prints(runner, prompt: str):
     return result, logs
 
 def extract_trade_volume(logs: str):
-    # 你提示词里要求输出形如：ssss111.58eeee
-    m = re.search(r"ssss\s*([0-9]+(?:\.[0-9]+)?)\s*eee+e", logs)
+    # 提取 "预估" 后面跟随的 ¥ 或 $ 的金额
+    m = re.search(r"预估\s*([\¥\$])([0-9]+(?:\.[0-9]+)?)", logs)
     if not m:
         return None
-    return float(m.group(1))
+    # 返回提取的金额（以浮动类型返回）
+    return float(m.group(2))  # 这里改为返回数字部分，而不是货币符号
+
+
+
 
 # 使用示例
 def task_get_alpha_estimated_volume(runner):
     task_return_homepage(runner)
 
-    prompt = """当前是币安app 1.首页的左上方有三道横杠,点进去后是个人中心页面你会看到下方的更多服务四个字的按钮 2. 点击更多服务进入服务页面服务页面上方有个搜索框搜索alpha活动，搜到后点击alpha活动 4.向下滑动alpha页面，会看到今天的交易量预估。在交易额数字的前方添加ssss交易和的尾部添加eee，然后输出它，例如ssss111.58eeee, 然后点击左上角的返回箭头，退回至服务页面 5.如果已经在服务页面，继续点击左上角的返回箭头退回至个人中心，6.如果已经在个人中心页面，继续点击左上角的返回箭头退回币安app的主页"""
+    prompt = """当前是币安app首页,1:首页页面的顶部，在页面的上方你会看到 Alpha活动 的图标,点击它进入 Alpha活动 页面，进入Alpha活动页后,后点击右上角的三个点的菜单会出现一个弹窗，然后继续点击弹窗上的刷新功能， 2.滑动1次页面，start位置的[750,800],end[750,500]，滑动后会看页面有[预估 $xxxx]的内容,旁边有个向右的箭头,点击向右的箭头弹出的页面就可以清晰的看到预估的交易量。完成以上操作后点击左上角的返回箭头或则右上角的X按钮,退回至首页 """
 
     result, logs = run_and_capture_prints(runner, prompt)
 
@@ -120,7 +126,7 @@ def main():
     # #
     # task_enter_alpha_trade(runner, "RLS")
     # task_reset_alpha_trade_page(runner)
-    task_cancel_alpha_orders(runner)
+    # task_cancel_alpha_orders(runner)
     #task_place_alpha_buy_order(runner,"NIGHT")
 
     # # 获取alpha交易页面的数据
@@ -134,8 +140,8 @@ def main():
     # # 逛广场
     #task_browse_square(runner)
 
-    # volume = task_get_alpha_estimated_volume(runner)
-    # print(f"volume:{volume}")
+    volume = task_get_alpha_estimated_volume(runner)
+    print(f"volume:{volume}")
 
     # #看直播
     # task_watch_live(runner)
