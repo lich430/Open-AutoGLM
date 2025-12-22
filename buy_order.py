@@ -165,7 +165,7 @@ class CoinOrder:
             ClientLogWriter("用户指定稳定币:" + label)
             if label.endswith("|4"):
                 self.isFourTimes = True
-            self.coinName = label.strip("|4")
+            self.coinName = label.strip("|4").strip("|1")
 
     def GetDefaultCoin(self):
         return self.coinName

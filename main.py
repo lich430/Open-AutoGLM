@@ -6,6 +6,7 @@ import json
 import time
 import os
 
+import buy_order
 from runner import AutoGLMRunner
 import prompt
 
@@ -15,13 +16,14 @@ CounterOfCoinRequest = 0
 MaxRequest = 3
 
 def GetStabilityCoinNameRequest():
+    return ""
     with urllib.request.urlopen(StabilityServiceUrl) as response:
         json_text = response.read().decode('utf-8')
         coinList = json.loads(json_text)
         if len(coinList) > 0:
             TargetCoinName = coinList[0]
             return TargetCoinName
-        return "NIGHT"
+        return ""
 
 def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
 
@@ -39,6 +41,7 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
     print(f"coinName: {coinName}")
     if coinName == "":
         CounterOfCoinRequest += 1
+        buy_order.ClientLogWriter("没有获取到稳定币")
         if CounterOfCoinRequest >= MaxRequest:
             coinName = orderClient.GetDefaultCoin()
         else:
@@ -62,7 +65,7 @@ def WalkPlazaTask(llvmAgent: AutoGLMRunner):
 
 def UpdateTradeVolumeTask(orderClient: CoinOrder,llvmAgent: AutoGLMRunner):
     estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
-    print(f"获取预估的交易量: {estimated_volume}")
+    buy_order.ClientLogWriter(f"获取预估的交易量: {estimated_volume}")
     if estimated_volume is None:
         return
     orderClient.Reset(estimated_volume)
