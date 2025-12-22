@@ -77,8 +77,16 @@ def main(serial:str, label:str, otp:str, money):
     print(f"{today} serial: {serial}, label:{label}, otp:{otp}, money:{money}")
     # 连接设备
     device = u2.connect(serial)
-    orderClient = CoinOrder(device, label, otp, int(money))
     llvmAgent = GetLLVMAgent()
+    device_factory = llvmAgent.get_device_factory()
+    devices = device_factory.list_devices()
+    if not devices:
+        raise RuntimeError(
+            "device_id is empty and no devices were detected by device_factory.list_devices()"
+        )
+    device_id = devices[0].device_id
+
+    orderClient = CoinOrder(device, device_factory, device_id, label, otp, int(money))
 
     #WalkPlazaTask(llvmAgent)
 

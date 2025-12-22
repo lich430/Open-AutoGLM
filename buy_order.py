@@ -11,6 +11,9 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
+from phone_agent.agent import PhoneAgent
+from phone_agent.device_factory import DeviceFactory
+
 PromptPageReady = "当前页面是alpah交易的页面  1：如果发现选中的是即时的交易模式，就切换为限价的模式。2：如果发现在页面上用户的行为是卖出，就切换为买入。3：向下滑动页面，如果发现有未完成的委托单就取消所有的单 子，取消完成后向上滑动页面到顶部"
 PromptButtons = ""
 
@@ -150,8 +153,10 @@ class OrderPageButton:
         self.sellPricePoint = sellPricePoint
 
 class CoinOrder:
-    def __init__(self, device: u2.Device, label:str, otp:str, money:float|int):
+    def __init__(self, device: u2.Device, deviceFactory: DeviceFactory, deviceId: str, label:str, otp:str, money:float|int):
         self.device = device
+        self.deviceFactory = deviceFactory
+        self.deviceId = deviceId
         self.label = label
         self.otp = otp
         self.money = money
@@ -327,8 +332,8 @@ class CoinOrder:
         self.QuickRollDown()
         self.Sleep(1)
 
-        if not hasattr(self, "orderPageButton"):
-            self.GetOrderPageButton()
+        # 获取坐标
+        self.GetOrderPageButton()
 
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
@@ -382,22 +387,24 @@ class CoinOrder:
         # 向当前焦点所在的输入框发送数字
         self.Click(points)
         self.Sleep(0.3)
-        # 全选
-        self.device.press(123)
-        # 删除
-        for x in range(20):
-            self.device.press(67)
-        # 输入
+        self.deviceFactory.clear_text(self.deviceId)
+        # # 全选
+        # self.device.press(123)
+        # # 删除
+        # for x in range(20):
+        #     self.device.press(67)
+        # # 输入
         self.Sleep(1)
-        self.device.send_keys(str(text))
+        self.deviceFactory.type_text(str(text), self.deviceId)
 
 
     def ClearText(self, points:tuple[float|int, float|int]):
         # 向当前焦点所在的输入框发送数字
         self.Click(points)
         self.Sleep(0.3)
-        # 全选
-        self.device.press(123)
-        # 删除
-        for x in range(20):
-            self.device.press(67)
+        self.deviceFactory.clear_text(self.deviceId)
+        # # 全选
+        # self.device.press(123)
+        # # 删除
+        # for x in range(20):
+        #     self.device.press(67)

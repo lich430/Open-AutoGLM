@@ -10,7 +10,7 @@ from openai import OpenAI
 
 from phone_agent import PhoneAgent
 from phone_agent.agent import AgentConfig
-from phone_agent.device_factory import get_device_factory
+from phone_agent.device_factory import DeviceFactory, get_device_factory
 from phone_agent.model import ModelConfig
 
 
@@ -127,6 +127,29 @@ class AutoGLMRunner:
         )
 
         return PhoneAgent(model_config=model_config, agent_config=agent_config)
+
+    def build_agent(self) -> PhoneAgent:
+        resolved_device_id = self.resolve_device_id(None)
+        cfg = self.config
+
+        model_config = ModelConfig(
+            base_url=cfg.base_url,
+            model_name=cfg.model,
+            api_key=cfg.api_key,
+            lang=cfg.lang,
+        )
+
+        agent_config = AgentConfig(
+            max_steps=cfg.max_steps,
+            device_id=resolved_device_id,
+            verbose=cfg.verbose,
+            lang=cfg.lang,
+        )
+
+        return PhoneAgent(model_config=model_config, agent_config=agent_config)
+
+    def get_device_factory(self) -> DeviceFactory:
+        return get_device_factory()
 
     def run(self, task: str, device_id: Optional[str] = None, check_api: bool = True) -> str:
         if task is None or not str(task).strip():
