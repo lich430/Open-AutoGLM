@@ -10,7 +10,7 @@ from runner import AutoGLMRunner
 import prompt
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
-lastCoinName = ""
+LastCoinName = ""
 
 def GetStabilityCoinNameRequest():
     with urllib.request.urlopen(StabilityServiceUrl) as response:
@@ -23,7 +23,7 @@ def GetStabilityCoinNameRequest():
 
 def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
 
-    global lastCoinName
+    global LastCoinName
 
     if orderClient.IsFinish():
         prompt.task_browse_square(llvmAgent)
@@ -31,18 +31,16 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
         return
 
     coinName = GetStabilityCoinNameRequest()
-
     print(f"coinName: {coinName}")
-
     if coinName == "":
         prompt.task_browse_square(llvmAgent)
         return
 
-    # 如果最最新的代币和上次选择的的不一样，就需要重新进入交易页面, todo:或者直接在交易页面切换币种
-    if lastCoinName != coinName:
+    # 如果最新的代币和上次选择的的不一样，就需要重新进入交易页面, todo:或者直接在交易页面切换币种
+    if LastCoinName != coinName:
         prompt.task_enter_alpha_trade(llvmAgent, coinName)
         prompt.task_reset_alpha_trade_page(llvmAgent)
-        lastCoinName = coinName
+        LastCoinName = coinName
 
     prompt.task_cancel_alpha_orders(llvmAgent)
     orderClient.BuyOrderAction(coinName)
@@ -51,13 +49,14 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
 def WalkPlazaTask(llvmAgent: AutoGLMRunner):
     prompt.task_browse_square(llvmAgent)
 
-def UpdateTradeVolume(orderClient: CoinOrder,llvmAgent: AutoGLMRunner):
+def UpdateTradeVolumeTask(orderClient: CoinOrder,llvmAgent: AutoGLMRunner):
     estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
     print(f"获取预估的交易量: {estimated_volume}")
+    if estimated_volume is None:
+        return
     orderClient.Reset(estimated_volume)
 
 def GetLLVMAgent() -> AutoGLMRunner:
-
     return AutoGLMRunner()
 
 def main(serial:str, label:str, otp:str, money):
@@ -71,15 +70,14 @@ def main(serial:str, label:str, otp:str, money):
 
     WalkPlazaTask(llvmAgent)
 
-    i = 0
-
+    counter = 0
     while True:
         # 每交易4次查询一次交易量
-        if i >= 3:
-            UpdateTradeVolume(orderClient, llvmAgent)
-            i = 0
+        if counter >= 3:
+            UpdateTradeVolumeTask(orderClient, llvmAgent)
+            counter = 0
 
-        i = i + 1
+        counter = counter + 1
 
         # 进入交易页面
         PlayDealTask(orderClient, llvmAgent)

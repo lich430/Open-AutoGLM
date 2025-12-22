@@ -171,12 +171,20 @@ class CoinOrder:
         # 获取当前界面的层级结构
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
+        pricePoint = self.GetElemPointByAttribute(root, "text", "价格")
+        print("购买价格坐标:", pricePoint)
+        # 去掉输入框内数据
+        self.Click(pricePoint)
+        self.Sleep(1)
+        self.ClearText(pricePoint)
+        self.Sleep(1)
+
+        xml = self.device.dump_hierarchy()
+        root = ET.fromstring(xml)
         volumePoint = self.GetElemPointByAttribute(root, "text", "总额(USDT)")
         print("总额坐标:", volumePoint)
         actionButton = self.GetElemPointByAttribute(root, "text", "买入 *")
         print("购买坐标:", actionButton)
-        pricePoint = self.GetElemPointByAttribute(root, "text", "价格")
-        print("购买价格坐标:", pricePoint)
         sellPricePoint = self.GetElemPointByAttribute(root, "text", "卖出价格 (USDT)")
         print("卖出价格坐标:", sellPricePoint)
         self.orderPageButton = OrderPageButton(pricePoint, sellPricePoint, volumePoint, actionButton)
@@ -292,7 +300,10 @@ class CoinOrder:
 
     def IsFinish(self) -> bool:
         cachedData = self.taskCounter.load()
-        return cachedData["cash"] >= self.money
+        result = (cachedData["cash"] >= self.money)
+        if result:
+            ClientLogWriter("IsFinish() ==> 完成")
+        return result
 
     def Reset(self, cash: float):
         cachedData = self.taskCounter.load()
@@ -336,7 +347,7 @@ class CoinOrder:
 
         xml = self.device.dump_hierarchy()
         root = ET.fromstring(xml)
-        point = self.GetElemPointByAttribute(root, "text", "确定")
+        point = self.GetElemPointByAttribute(root, "text", "确认")
         if len(point) == 0:
             print("买单 确认 未完成")
             return False
@@ -367,3 +378,14 @@ class CoinOrder:
         # 输入
         self.Sleep(1)
         self.device.send_keys(str(text))
+
+
+    def ClearText(self, points:tuple[float|int, float|int]):
+        # 向当前焦点所在的输入框发送数字
+        self.Click(points)
+        self.Sleep(0.3)
+        # 全选
+        self.device.press(123)
+        # 删除
+        for x in range(20):
+            self.device.press(67)
