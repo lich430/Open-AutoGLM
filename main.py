@@ -16,13 +16,11 @@ CounterOfCoinRequest = 0
 MaxRequest = 3
 
 def GetStabilityCoinNameRequest():
-    return ""
     with urllib.request.urlopen(StabilityServiceUrl) as response:
         json_text = response.read().decode('utf-8')
         coinList = json.loads(json_text)
         if len(coinList) > 0:
-            TargetCoinName = coinList[0]
-            return TargetCoinName
+            return coinList[0]
         return ""
 
 def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
