@@ -237,6 +237,7 @@ class PhoneAgent:
 
         # Execute action
         try:
+            print(f"屏幕尺寸 宽:{screenshot.width},高:{screenshot.height}")
             result = self.action_handler.execute(
                 action, screenshot.width, screenshot.height
             )
