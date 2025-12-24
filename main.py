@@ -46,6 +46,7 @@ def PlayDealTask(orderClient: HyperTradeBot, llvmAgent: AutoGLMRunner):
         else:
             # TODO::随机选择
             prompt.task_browse_square(llvmAgent)
+            prompt.task_spot_buy_bnb(llvmAgent)
             return
     # 重置计数
     CounterOfCoinRequest = 0
