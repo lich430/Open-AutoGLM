@@ -288,6 +288,7 @@ class HyperTradeBot:
 
         self.dev.tap_rel_1000(confirm_xy[0], confirm_xy[1], sc2.width, sc2.height)
 
+        # 自定义稳定币未必是4倍积分
         if (coinName == self.coinName) and (not self.isFourTimes):
             self.totalDeal += available_amount
         else:
