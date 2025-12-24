@@ -24,14 +24,14 @@ def GetStabilityCoinNameRequest():
             return coinList[0]
         return ""
 
-def PlayDealTask(orderClient: HyperTradeBot, llvmAgent: AutoGLMRunner):
+def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
 
     global LastCoinName
     global CounterOfCoinRequest
 
-    if orderClient.IsFinish() and not orderClient.IsConfirm():
-        UpdateTradeVolumeTask(orderClient,llvmAgent)
-    if orderClient.IsFinish() and orderClient.IsConfirm():
+    if bot.IsFinish() and not bot.IsConfirm():
+        UpdateTradeVolumeTask(bot,llvmAgent)
+    if bot.IsFinish() and bot.IsConfirm():
         prompt.task_browse_square(llvmAgent)
         prompt.task_watch_live(llvmAgent)
         return
@@ -42,7 +42,7 @@ def PlayDealTask(orderClient: HyperTradeBot, llvmAgent: AutoGLMRunner):
         CounterOfCoinRequest += 1
         buy_order.ClientLogWriter("没有获取到稳定币")
         if CounterOfCoinRequest >= MaxRequest:
-            coinName = orderClient.GetDefaultCoin()
+            coinName = bot.GetDefaultCoin()
         else:
             # TODO::随机选择
             prompt.task_browse_square(llvmAgent)
@@ -59,7 +59,7 @@ def PlayDealTask(orderClient: HyperTradeBot, llvmAgent: AutoGLMRunner):
 
     prompt.task_cancel_alpha_orders(llvmAgent)
 
-    result = orderClient.alpha_trade(buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
+    result = bot.alpha_trade(buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
     print("DONE:", result)
     time.sleep(5)
 
