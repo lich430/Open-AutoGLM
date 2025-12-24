@@ -225,6 +225,7 @@ class HyperTradeBot:
 
     def alpha_trade(
         self,
+        coinName:str,
         buy_ratio: float = 0.95,
         buy_markup: float = 1.03,
         sell_discount: float = 0.97,
@@ -286,6 +287,13 @@ class HyperTradeBot:
             raise RuntimeError(f"extract_confirm_button_xy failed. resp={resp_confirm}")
 
         self.dev.tap_rel_1000(confirm_xy[0], confirm_xy[1], sc2.width, sc2.height)
+
+        if (coinName == self.coinName) and (not self.isFourTimes):
+            self.totalDeal += available_amount
+        else:
+            self.totalDeal += available_amount*4
+            self.taskCounter.inc("cash", available_amount*4)
+        print("买单 确认 完成")
 
         return {
             "targets": targets,
