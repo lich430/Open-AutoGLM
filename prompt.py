@@ -7,16 +7,16 @@ import contextlib
 import re
 
 def task_switch_to_exchange(runner: AutoGLMRunner):
-
-    prompt = """页面顶部有两个按钮分别是 交易平台和钱包， 如果交易平台不是被选中的状态，就点击它，如果交易平台是被选中的白色背景那就什么也不做"""
+    prompt = """当前操作的是币安APP 如果页面"顶部"有两个按钮分别是"交易平台和钱包"，如果交易平台是被选中的白色背景那就什么也不做，否则就点击交易平台按钮，最多操作1步后就立即结束任务"""
     runner.run(prompt)
 
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
-    task_switch_to_exchange(runner)
 
-    prompt = """打开币安APP 1:APP首页底部有一个导航栏，导航栏有5个选项分别是首页,行情，交易，合约，资产。首页选项是被选中时就是已经在首页了，2: 如果是在首页了什么都不用做，如果不是首页并且页面的左上角有返回箭头,点击返回箭头返回上级页面，在新的页面继续点击返回箭头，击直到最新页面底部有导航栏，点击底部导航栏的首页选项进入首页。"""
+    prompt = """当前操作的是币安APP 1:如果页面有底部导航栏：首页、行情、交易、合约、资产，双击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化。 2: 如果页面下方没有导航栏且的左上角有返回箭头或者右上角有关闭按钮(X形状)，点击返回箭头或则关闭按钮重复该操直到页面出现了导航栏，双击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化"""
     runner.run(prompt)
+
+    task_switch_to_exchange(runner)
 
 
 # 进入alpha交易，具体的操作如下：
@@ -148,16 +148,20 @@ def task_get_alpha_estimated_volume(runner):
     # 你也可以把 logs 存文件，或进一步解析
     return volume
 
-def test(runner):
-    runner.run("点击当前屏幕坐标(220, 515)的位置")
+def task_spot_buy_bnb(runner):
+    task_return_homepage(runner)
+    prompt = """
+当前是币安app的首页，按照以下步骤执行: 1: 点击底部导航栏的行情选项 2：在行情页面顶部有一个搜索框,搜索"BNB",如果输入框下方的历史记录有BNB你就直接点击就好了，不需要输入BNB了 3：搜索的结果中有很多分类分别是"所有，现货，Alpha,合约，期权",选择现货这个分类 4：然后点击现货分类中的第一个搜索结果，然后进入行情页面。 5：行情页面的右下方有两个按钮分别是"买入，卖出"，点击绿色的买入按钮，进入交易页面。 6：在交易页面有一个总金额的输入框，输入10。然后点击买入BNB并确定下单
+"""
+    runner.run(prompt)
 
 
 def main():
     runner = AutoGLMRunner()
-    test(runner)
+    task_spot_buy_bnb(runner)
     return
-
-    # task_switch_to_exchange(runner)
+    #task_switch_to_exchange(runner)
+    #task_return_homepage(runner)
 
     # # alpha交易相关的
     # #
