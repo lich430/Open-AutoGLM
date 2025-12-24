@@ -7,6 +7,7 @@ import re
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
+from task_counter import TaskCounter
 
 import requests
 
@@ -186,12 +187,45 @@ class DeviceOps:
 # 5) 一键流程封装：识别->输入->买入->弹窗确认
 # ----------------------------
 class HyperTradeBot:
-    def __init__(self, glm: GLMVisionClient, dev: DeviceOps):
+    def __init__(self, serial: str, label: str, money:float, glm: GLMVisionClient, dev: DeviceOps):
         self.glm = glm
         self.dev = dev
+        self.money = money
+        self.label = label
+        self.taskCounter = TaskCounter(serial)
+        if label != "":
+            ClientLogWriter("用户指定稳定币:" + label)
+            if label.endswith("|4"):
+                self.isFourTimes = True
+            self.coinName = label.strip("|4").strip("|1")
 
-    def run_once(
+    def GetDefaultCoin(self):
+        return self.coinName
+
+    def IsFinish(self) -> bool:
+        cachedData = self.taskCounter.load()
+        result = (cachedData["cash"] >= self.money)
+        if result:
+            ClientLogWriter("IsFinish() ==> 完成")
+        return result
+
+    def IsConfirm(self) -> bool:
+        cachedData = self.taskCounter.load()
+        checked = cachedData.get("checked")
+        if checked is None:
+            return False
+        return checked
+
+    def Reset(self, cash: float):
+        cachedData = self.taskCounter.load()
+        cachedData["cash"] = cash
+        if cash >=self.money:
+            cachedData["checked"] = True
+        self.taskCounter.save(cachedData)
+
+    def alpha_trade(
         self,
+        coinName:str,
         buy_ratio: float = 0.95,
         buy_markup: float = 1.03,
         sell_discount: float = 0.97,
@@ -254,6 +288,14 @@ class HyperTradeBot:
 
         self.dev.tap_rel_1000(confirm_xy[0], confirm_xy[1], sc2.width, sc2.height)
 
+        # 自定义稳定币未必是4倍积分
+        if (coinName == self.coinName) and (not self.isFourTimes):
+            self.totalDeal += available_amount
+        else:
+            self.totalDeal += available_amount*4
+            self.taskCounter.inc("cash", available_amount*4)
+        print("买单 确认 完成")
+
         return {
             "targets": targets,
             "available_amount": available_amount,
@@ -270,3 +312,7 @@ def get_api_key_from_env(env_name: str = "BIGMODEL_API_KEY") -> str:
     if not v:
         raise RuntimeError(f"Missing env var {env_name}. e.g. set {env_name}=your_key")
     return v
+
+
+def ClientLogWriter(text, end="\n"):
+    print("INFO::", time.asctime(), text)
