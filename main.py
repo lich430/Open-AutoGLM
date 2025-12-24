@@ -9,7 +9,7 @@ import os
 import buy_order
 from runner import AutoGLMRunner
 import prompt
-from hyper_glm_trade import DeviceOps, GLMVisionClient, HyperTradeBot, get_api_key_from_env
+from hyper_glm_trade import ClientLogWriter, DeviceOps, GLMVisionClient, HyperTradeBot, get_api_key_from_env
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
 LastCoinName = ""
@@ -66,17 +66,17 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
 def WalkPlazaTask(llvmAgent: AutoGLMRunner):
     prompt.task_browse_square(llvmAgent)
 
-def UpdateTradeVolumeTask(orderClient: HyperTradeBot,llvmAgent: AutoGLMRunner):
+def UpdateTradeVolumeTask(bot: HyperTradeBot,llvmAgent: AutoGLMRunner):
     estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
     buy_order.ClientLogWriter(f"获取预估的交易量: {estimated_volume}")
     if estimated_volume is None:
         return
-    orderClient.Reset(estimated_volume)
+    bot.Reset(estimated_volume)
 
 def GetLLVMAgent() -> AutoGLMRunner:
     return AutoGLMRunner()
 
-def main(serial:str, label:str, otp:str, money):
+def main(serial:str, label:str, otp:str, money:float):
     # 设备配置
     today = datetime.now()
     print(f"{today} serial: {serial}, label:{label}, otp:{otp}, money:{money}")
