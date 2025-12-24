@@ -9,6 +9,7 @@ import os
 import buy_order
 from runner import AutoGLMRunner
 import prompt
+from hyper_glm_trade import DeviceOps, GLMVisionClient, HyperTradeBot, get_api_key_from_env
 
 StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
 LastCoinName = ""
@@ -23,7 +24,7 @@ def GetStabilityCoinNameRequest():
             return coinList[0]
         return ""
 
-def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
+def PlayDealTask(orderClient: HyperTradeBot, llvmAgent: AutoGLMRunner):
 
     global LastCoinName
     global CounterOfCoinRequest
@@ -43,6 +44,7 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
         if CounterOfCoinRequest >= MaxRequest:
             coinName = orderClient.GetDefaultCoin()
         else:
+            # TODO::随机选择
             prompt.task_browse_square(llvmAgent)
             return
     # 重置计数
@@ -55,13 +57,15 @@ def PlayDealTask(orderClient: CoinOrder, llvmAgent: AutoGLMRunner):
         LastCoinName = coinName
 
     prompt.task_cancel_alpha_orders(llvmAgent)
-    orderClient.BuyOrderAction(coinName)
+
+    result = orderClient.alpha_trade(buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
+    print("DONE:", result)
     time.sleep(5)
 
 def WalkPlazaTask(llvmAgent: AutoGLMRunner):
     prompt.task_browse_square(llvmAgent)
 
-def UpdateTradeVolumeTask(orderClient: CoinOrder,llvmAgent: AutoGLMRunner):
+def UpdateTradeVolumeTask(orderClient: HyperTradeBot,llvmAgent: AutoGLMRunner):
     estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
     buy_order.ClientLogWriter(f"获取预估的交易量: {estimated_volume}")
     if estimated_volume is None:
@@ -76,17 +80,19 @@ def main(serial:str, label:str, otp:str, money):
     today = datetime.now()
     print(f"{today} serial: {serial}, label:{label}, otp:{otp}, money:{money}")
     # 连接设备
-    device = u2.connect(serial)
     llvmAgent = GetLLVMAgent()
     device_factory = llvmAgent.get_device_factory()
     devices = device_factory.list_devices()
     if not devices:
-        raise RuntimeError(
-            "device_id is empty and no devices were detected by device_factory.list_devices()"
-        )
+        raise RuntimeError("No devices detected")
+
     device_id = devices[0].device_id
 
-    orderClient = CoinOrder(device, device_factory, device_id, label, otp, int(money))
+    api_key = get_api_key_from_env("BIGMODEL_API_KEY")  # 推荐用环境变量
+    glm = GLMVisionClient(api_key=api_key, model="glm-4.6v")
+
+    dev = DeviceOps(device_factory, device_id)
+    bot = HyperTradeBot(device_id, label, money, glm, dev)
 
     #WalkPlazaTask(llvmAgent)
 
@@ -94,14 +100,14 @@ def main(serial:str, label:str, otp:str, money):
     while True:
         # 每交易4次查询一次交易量
         if counter >= 3:
-            UpdateTradeVolumeTask(orderClient, llvmAgent)
+            UpdateTradeVolumeTask(bot, llvmAgent)
             counter = 0
 
         counter = counter + 1
 
         # 进入交易页面
-        PlayDealTask(orderClient, llvmAgent)
+        PlayDealTask(bot, llvmAgent)
         time.sleep(2)
 
 if __name__ == "__main__":
-    main(os.environ["SERIAL"], "KOGE|1", "", 10)
+    main("", "KOGE|1", "", 10)
