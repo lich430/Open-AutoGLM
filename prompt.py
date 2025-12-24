@@ -2,8 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from runner import AutoGLMRunner
-import io
-import contextlib
+from phone_agent.device_factory import get_device_factory
+import json
+import re
+from typing import Optional, Tuple
+
+import requests
 import re
 
 def task_switch_to_exchange(runner: AutoGLMRunner):
@@ -13,7 +17,7 @@ def task_switch_to_exchange(runner: AutoGLMRunner):
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
 
-    prompt = """当前操作的是币安APP 1:如果页面有底部导航栏：首页、行情、交易、合约、资产，双击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化。 2: 如果页面下方没有导航栏且的左上角有返回箭头或者右上角有关闭按钮(X形状)，点击返回箭头或则关闭按钮重复该操直到页面出现了导航栏，双击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化"""
+    prompt = """当前操作的是币安APP 1:如果页面有底部导航栏：首页、行情、交易、合约、资产，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化。 2: 如果页面下方没有导航栏且的左上角有返回箭头或者右上角有关闭按钮(X形状)，点击返回箭头或则关闭按钮重复该操直到页面出现了导航栏，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化"""
     runner.run(prompt)
 
     task_switch_to_exchange(runner)
@@ -36,37 +40,6 @@ def task_reset_alpha_trade_page(runner: AutoGLMRunner):
     runner.run(prompt)
 
 
-# 执行购买：
-def task_place_alpha_buy_order(runner: AutoGLMRunner, symbol: str):
-    #task_cancel_alpha_orders(runner)
-    prompt = """
-当前页面布局如下：
-1. 顶部显示"现货"、"杠杆"、"交易机器人"、"C2C"、"Alpha"等标签，当前在"Alpha"页面
-2. 显示的是"xxxx"的交易界面
-3. 价格列表在右侧，从上到下显示
-4. 底部显示"当前价格: ¥xxxxxx xx%"
-5. 有"限价"和"即时"两个选项，当前选择的是"限价"
-6. 有"买入"和"卖出行"两个按钮
-7. 有"限价单"下拉框
-8. 有"价格"输入框，显示"xxxxxxxxxx"
-9. 有"建议价格 xxxxxxx"
-10. 有"数量(XXXXX)"输入框
-11. 有"总额(USDT)"输入框
-12. 有"反向订单"选项（已勾选）
-13. 有"卖出行价(USDT)"输入框
-14. 有"可用 xxxxxxx USDT"显示
-15. 有"预估手续费"
-16. 有"买入 XXXX"绿色按钮
-17. 有"成本价 xxxxxx USDT"
-
-请帮我完成以下任务：
-1. 价格输入框的右侧2/5是一个下拉框，左侧的3/5才是有效的输入框区域，你只能点击左侧的3/5区域否则会弹出USDT和USDC选择框,把当前价格的105%填入价格输入框。
-    """
-    #prompt = f"""交易页面上内容如下： 1.顶部有"现货"、"杠杆"、"交易机器人"、"C2C"、"Alpha"等标签，当前在"Alpha"页面 2.显示的是"ESPORTS"的交易界面 3.价格列表在右侧，从上到下显示 4.当前显示的最新价格是：XXXXX（在底部显示为"当前价格"） 5.有"限价"和"即时"两个选项，当前选择的是"限价" 6.有"买入"和"卖出行"两个按钮 6.5.有"限价单"下拉框. 7.有"价格"输入框。请你帮我把最新价格的1.05倍填入该输入框 8.有"建议价格 XXXXXX" (右边显示了价格) 9.有"数量(XXXX)"输入框 9.有"总额(USDT)"输入框。请你帮我把可用金额填入该输入框 10.有"反向订单"选项（已勾选） 11.有"卖出行价(USDT)"输入框。 请你帮我把最新价格的的0.95倍填入该输入框 12.有"可用 xxxxx USDT"显示 13.有"预估手续费" 14.有"成本价 xxxx USDT"。 请帮我完成以上需要你帮忙的任务"""
-    # prompt = f"""当前是币安app的alpha交易页面，1: 最新价格的定义--在页面的右侧有一个价格列表从上倒下的顺序第1个价格就是最新价。 2：将最新价格的1.03倍填入买入价格输入框---大概位置在建议价格上方,在该输入框的内部有价格的字样点击该价格字样下方输入框的位置，触发输入光标。3.可用资金--页面上显示可用的数据，例如: 可用 XXXXXX。可用资金保留两位有效数字填入USDT总额输入框， 点击总额输入框中间的位置，触发输入光标。4: 将最新价格的0.95倍填入反向订单价格输入框---该输入框在页面上上的x轴的大概坐标范围位于 反向订单 4个字的下方和 可用 2个字的上方, 点击反向订单价格输入框中间侧的位置，触发输入光标,填入反向价格。5.最后点击页面偏下方的 买入 {symbol} 按钮, 如果弹出确认框,你需要点击确认按钮。"""
-    runner.run(prompt)
-
-
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
     prompt = """当前是币安app的alpha交易页面,1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
@@ -84,8 +57,6 @@ def task_click_alpha_controls(runner: AutoGLMRunner):
 def task_get_alpha_latest_price(runner: AutoGLMRunner):
     prompt = """进入币安app,在当前alpha交易页面获取最新价格，页面的右侧有一个订单薄，订单薄的从上到下的顺序第一个价格就是最新价格， 请在最新价格的前后分别加上######。"""
     runner.run(prompt)
-
-
 
 
 # 进入合约交易USDT：
@@ -110,28 +81,8 @@ def task_browse_square(runner: AutoGLMRunner):
 def task_watch_live(runner: AutoGLMRunner):
     task_return_homepage(runner)
 
-    prompt = """1. 当前是币安app 2. 点击下方'直播'按钮  进入后向下持续滑动浏览 滑动尽量快速些 3. 进入一个直播间 在里面不操作任何内容 待够5分钟左右 然后退出直播间 持续下滑一会 然后重复上面操作5次"""
+    prompt = """1. 当前是币安app 2. 点击下方'直播'按钮  进入后向下持续滑动浏览 滑动尽量快速些 3. 进入一个直播间 在里面不操作任何内容 待够3-5分钟左右退出直播间 持续下滑一会然后结束任务"""
     runner.run(prompt)
-
-# 获取交易金额：
-
-def run_and_capture_prints(runner, prompt: str):
-    # result = runner.run(prompt)
-    # return
-    buf = io.StringIO()
-    with contextlib.redirect_stdout(buf):
-        result = runner.run(prompt)   # runner.run 原本会 print，这里会被写入 buf
-    logs = buf.getvalue()
-    return result, logs
-
-def extract_trade_volume(logs: str):
-    # 提取 "预估" 后面跟随的 ¥ 或 $ 的金额
-    m = re.search(r"预估\s*([\¥\$])([0-9]+(?:\.[0-9]+)?)", logs)
-    if not m:
-        return None
-    # 返回提取的金额（以浮动类型返回）
-    return float(m.group(2))  # 这里改为返回数字部分，而不是货币符号
-
 
 
 
@@ -139,14 +90,94 @@ def extract_trade_volume(logs: str):
 def task_get_alpha_estimated_volume(runner):
     task_return_homepage(runner)
 
-    prompt = """当前是币安app首页,1:首页页面的顶部，在页面的上方你会看到 Alpha活动 的图标,点击它进入 Alpha活动 页面，进入Alpha活动页后,后点击右上角的三个点的菜单会出现一个弹窗，然后继续点击弹窗上的刷新功能， 2.滑动1次页面，start位置的[750,800],end[750,500]，滑动后会看页面有[预估 $xxxx]的内容,旁边有个向右的箭头,点击向右的箭头弹出的页面就可以清晰的看到预估的交易量。完成以上操作后点击左上角的返回箭头或则右上角的X按钮,退回至首页 """
+    prompt = """当前是币安app 1:连续滑动三次start位置[750,850],end位置[750,300]，然后双击("action": "Double Tap")左下角的首页菜单。2:点击页面的上方的"Alpha活动"的图标，进入Alpha活动页后点击右上角的三个点的菜单会出现一个弹窗，然后继续点击弹窗上的刷新功能， 3.向上滑动1次页面，start位置的[750,850],end[750,300],然后结束任务"""
+    runner.run(prompt)
 
-    result, logs = run_and_capture_prints(runner, prompt)
+    device_factory = get_device_factory()
+    device_id = device_factory.list_devices()[0].device_id
 
-    volume = extract_trade_volume(logs)
-    print("捕获到的volume:", volume)
-    # 你也可以把 logs 存文件，或进一步解析
+    volume = get_today_trade_volume(
+        device_factory=device_factory,
+        device_id=device_id,
+    )
+
+    print("today volume:", volume)
+
     return volume
+
+
+def get_today_trade_volume(
+    device_factory,
+    device_id: str,
+    *,
+    model: str = "glm-4.6v",
+    url: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    timeout_s: int = 60,
+    return_raw: bool = False,
+) -> float | Tuple[float, str]:
+    """
+    截图 -> 调用 GLM 识别 -> 从返回的 message.content 中提取今天的预估交易量
+
+    返回:
+      - return_raw=False: volume(float)
+      - return_raw=True : (volume(float), raw_response_text(str))
+    """
+    screenshot = device_factory.get_screenshot(device_id)
+
+    api_key = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    prompt = '帮我提取"今天"的预估数据中的交易量。在交易量的前面加hyper后面加byte后输出，举例:"hyper1000byte"'
+
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": screenshot.base64_data}},
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ],
+        "stream": False,
+        "thinking": {"type": "enabled", "clear_thinking": True},
+        "do_sample": True,
+        "temperature": 1,
+        "top_p": 0.95,
+        "tool_stream": False,
+        "response_format": {"type": "text"},
+    }
+
+    resp = requests.post(url, json=payload, headers=headers, timeout=timeout_s)
+    resp.raise_for_status()
+
+    raw_text = resp.text
+
+    # 解析 content
+    obj = json.loads(raw_text)
+    content = obj["choices"][0]["message"]["content"]
+    if not isinstance(content, str):
+        raise RuntimeError(f"GLM content is not str: {type(content)}")
+
+    content = content.strip()
+
+    # 提取 hyperxxxbyte 中的 xxx（数字）
+    m = re.search(r"hyper\s*([0-9]+(?:\.[0-9]+)?)\s*byte", content, flags=re.IGNORECASE)
+    if not m:
+        # 兜底：抓 content 里的第一个数字
+        nums = re.findall(r"[0-9]+(?:\.[0-9]+)?", content)
+        if not nums:
+            raise RuntimeError(f"Cannot parse volume from content: {content!r}")
+        volume = float(nums[0])
+    else:
+        volume = float(m.group(1))
+
+    return (volume, raw_text) if return_raw else volume
+
 
 def task_spot_buy_bnb(runner):
     task_return_homepage(runner)
@@ -158,8 +189,8 @@ def task_spot_buy_bnb(runner):
 
 def main():
     runner = AutoGLMRunner()
-    task_spot_buy_bnb(runner)
-    return
+    # task_spot_buy_bnb(runner)
+    # return
     #task_switch_to_exchange(runner)
     #task_return_homepage(runner)
 
@@ -181,11 +212,11 @@ def main():
     # # 逛广场
     #task_browse_square(runner)
 
-    # volume = task_get_alpha_estimated_volume(runner)
-    # print(f"volume:{volume}")
+    volume = task_get_alpha_estimated_volume(runner)
+    print(f"volume:{volume}")
 
     # #看直播
-    # task_watch_live(runner)
+    #task_watch_live(runner)
 
 
 if __name__ == "__main__":
