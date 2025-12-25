@@ -47,6 +47,7 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
             # TODO::随机选择
             prompt.task_browse_square(llvmAgent)
             prompt.task_spot_buy_bnb(llvmAgent)
+            ClientLogWriter("随机选择事件:")
             return
     # 重置计数
     CounterOfCoinRequest = 0
@@ -69,9 +70,10 @@ def WalkPlazaTask(llvmAgent: AutoGLMRunner):
 def UpdateTradeVolumeTask(bot: HyperTradeBot,llvmAgent: AutoGLMRunner):
     estimated_volume = prompt.task_get_alpha_estimated_volume(llvmAgent)
     buy_order.ClientLogWriter(f"获取预估的交易量: {estimated_volume}")
-    if estimated_volume is None:
-        return
-    bot.Reset(estimated_volume)
+    if type(estimated_volume) is tuple:
+        return bot.Reset(estimated_volume[0])
+    if type(estimated_volume) is float:
+        bot.Reset(estimated_volume)
 
 def GetLLVMAgent() -> AutoGLMRunner:
     return AutoGLMRunner()

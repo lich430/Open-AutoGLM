@@ -192,6 +192,7 @@ class HyperTradeBot:
         self.dev = dev
         self.money = money
         self.label = label
+        self.totalDeal = 0
         self.taskCounter = TaskCounter(serial)
         if label != "":
             ClientLogWriter("用户指定稳定币:" + label)
