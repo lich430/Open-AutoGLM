@@ -193,12 +193,19 @@ class HyperTradeBot:
         self.money = money
         self.label = label
         self.totalDeal = 0
+        self.times = 1
+        self.coinName = ""
         self.taskCounter = TaskCounter(serial)
+
+        # 用户自定义稳定币的陪数
         if label != "":
             ClientLogWriter("用户指定稳定币:" + label)
-            if label.endswith("|4"):
-                self.isFourTimes = True
-            self.coinName = label.strip("|4").strip("|1")
+            fields = label.split("|")
+            if len(fields) == 0:
+                return
+            if len(fields) == 2:
+                self.times = int(fields[1])
+            self.coinName = fields[0]
 
     def GetDefaultCoin(self):
         return self.coinName
@@ -290,8 +297,8 @@ class HyperTradeBot:
         self.dev.tap_rel_1000(confirm_xy[0], confirm_xy[1], sc2.width, sc2.height)
 
         # 自定义稳定币未必是4倍积分
-        if (coinName == self.coinName) and (not self.isFourTimes):
-            self.totalDeal += available_amount
+        if coinName == self.coinName:
+            self.totalDeal += available_amount * self.times
         else:
             self.totalDeal += available_amount*4
             self.taskCounter.inc("cash", available_amount*4)
