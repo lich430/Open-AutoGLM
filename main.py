@@ -4,7 +4,7 @@ import uiautomator2 as u2
 import urllib.request
 import json
 import time
-import os
+import random
 
 import buy_order
 from runner import AutoGLMRunner
@@ -44,10 +44,24 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
         if CounterOfCoinRequest >= MaxRequest:
             coinName = bot.GetDefaultCoin()
         else:
-            # TODO::随机选择
-            prompt.task_browse_square(llvmAgent)
-            prompt.task_spot_buy_bnb(llvmAgent)
-            ClientLogWriter("随机选择事件:")
+            # 随机选择广场，还是任务
+            index = random.randint(0, 9)
+            taskName = "square"
+            if index > 5:
+                # 任务
+                taskName = bot.TakeTask()
+                # 不在乎结果，可以先记录状态
+                bot.SaveTaskResult(taskName, True)
+
+            if taskName == "bnb":
+                prompt.task_spot_buy_bnb(llvmAgent)
+            elif taskName == "futures":
+                pass
+            elif taskName == "finance":
+                pass
+            elif taskName == "square":
+                prompt.task_browse_square(llvmAgent)
+            ClientLogWriter(f"随机选择事件: {taskName}")
             return
     # 重置计数
     CounterOfCoinRequest = 0

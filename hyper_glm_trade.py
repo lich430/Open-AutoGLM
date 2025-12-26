@@ -195,6 +195,7 @@ class HyperTradeBot:
         self.totalDeal = 0
         self.times = 1
         self.coinName = ""
+        self.taskList = ("bnb", )
         self.taskCounter = TaskCounter(serial)
 
         # 用户自定义稳定币的陪数
@@ -230,6 +231,20 @@ class HyperTradeBot:
         if cash >=self.money:
             cachedData["checked"] = True
         self.taskCounter.save(cachedData)
+
+    def TakeTask(self) -> str:
+        # 任务列表
+        cachedData = self.taskCounter.load()
+        for taskName in self.taskList:
+            result = cachedData[taskName]
+            if result:
+                return taskName
+        return ""
+
+    def SaveTaskResult(self, taskName:str, result:bool):
+        cachedData = self.taskCounter.load()
+        cachedData[taskName] = result
+        self.taskCounter.safe_save(cachedData)
 
     def alpha_trade(
         self,
