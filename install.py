@@ -1,21 +1,27 @@
 import os
 import sys
+import shutil
 import tarfile, urllib.request, pathlib
 import subprocess
 
 InitDir = "/home/admin/env/"
-ProjectDir = "/home/admin/env/glm"
+ProjectDir = f"{InitDir}/glm"
 OldProjectDir = f"{ProjectDir}_old"
-TempProjectDir = "/home/admin/env/download/glm"
-DownloadDir = "/home/admin/env/download"
+TempProjectDir = f"{InitDir}/download/glm"
+DownloadDir = f"{InitDir}/download"
 TarFilename = "glm.tar.gz"
 
 def install_tar_url(url: str, *, interpreter=sys.executable):
     """下载 tar.gz"""
 
     os.chdir(InitDir)
-    os.rmdir(DownloadDir)
-    os.mkdir(DownloadDir)
+    try:
+        shutil.rmtree(DownloadDir)
+    except Exception as e:
+        pass
+    finally:
+        os.mkdir(DownloadDir)
+
     tar_path = pathlib.Path(DownloadDir) / "glm.tar.gz"
     print("Downloading", url)
     urllib.request.urlretrieve(url, tar_path)
@@ -26,9 +32,16 @@ def install_tar_url(url: str, *, interpreter=sys.executable):
         tf.extractall(DownloadDir)
     os.chdir(InitDir)
     # 链接与清理
-    os.remove(OldProjectDir)
-    os.rename(OldProjectDir, ProjectDir)
-    os.rename(ProjectDir, TempProjectDir)
+    try:
+        shutil.rmtree(OldProjectDir)
+    except:
+        pass
+
+    try:
+        os.rename(ProjectDir, OldProjectDir)
+    except Exception as e:
+        pass
+    os.rename(TempProjectDir, ProjectDir)
     os.chdir(ProjectDir)
     subprocess.check_call([interpreter, "-m", "pip", "install", "-r", "requirements.txt", "-i", "https://pypi.tuna.tsinghua.edu.cn/simple", "--trusted-host", "pypi.tuna.tsinghua.edu.cn"])
 
@@ -46,9 +59,11 @@ def check_env(version, url):
 
 if __name__ == "__main__":
     # 硬编码的参数： serial, label, otp, menoy
-    url = "http://"
-    version = otp
+    url = "http://118.31.111.114:8080/filesrv/glm.tar.gz"
+    # version = otp
+    version = "0.0.1"
     check_env(version, url)
     os.chdir(ProjectDir)
+    sys.path.append(".")
     import main
-    main.main(serial, label, "", menoy)
+    main.main(serial, label, otp, float(money))

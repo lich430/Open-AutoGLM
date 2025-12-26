@@ -28,6 +28,25 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
     global LastCoinName
     global CounterOfCoinRequest
 
+    def do_task():
+        # 随机选择广场，还是任务
+        index = random.randint(0, 9)
+        taskName = "square"
+        if index > 5:
+            # 任务
+            taskName = bot.TakeTask()
+            # 不在乎结果，可以先记录状态
+            bot.SaveTaskResult(taskName, True)
+        ClientLogWriter(f"随机选择事件: {taskName}")
+        if taskName == "bnb":
+            prompt.task_spot_buy_bnb(llvmAgent)
+        elif taskName == "futures":
+            pass
+        elif taskName == "finance":
+            pass
+        elif taskName == "square" or taskName == "":
+            prompt.task_browse_square(llvmAgent)
+
     if bot.IsFinish() and not bot.IsConfirm():
         UpdateTradeVolumeTask(bot,llvmAgent)
     if bot.IsFinish() and bot.IsConfirm():
@@ -40,30 +59,17 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
     if coinName == "":
         CounterOfCoinRequest += 1
         buy_order.ClientLogWriter("没有获取到稳定币")
+        # 空闲时间
+        if CounterOfCoinRequest < MaxRequest:
+             do_task()
+             return
         if CounterOfCoinRequest >= MaxRequest:
+            CounterOfCoinRequest = 0
             coinName = bot.GetDefaultCoin()
-        else:
-            # 随机选择广场，还是任务
-            index = random.randint(0, 9)
-            taskName = "square"
-            if index > 5:
-                # 任务
-                taskName = bot.TakeTask()
-                # 不在乎结果，可以先记录状态
-                bot.SaveTaskResult(taskName, True)
-
-            if taskName == "bnb":
-                prompt.task_spot_buy_bnb(llvmAgent)
-            elif taskName == "futures":
-                pass
-            elif taskName == "finance":
-                pass
-            elif taskName == "square" or taskName == "":
-                prompt.task_browse_square(llvmAgent)
-            ClientLogWriter(f"随机选择事件: {taskName}")
+        # 没有稳定币，进入空闲时间
+        if coinName == "":
+            do_task()
             return
-    # 重置计数
-    CounterOfCoinRequest = 0
 
     # 如果最新的代币和上次选择的的不一样，就需要重新进入交易页面, todo:或者直接在交易页面切换币种
     if LastCoinName != coinName:
@@ -104,7 +110,8 @@ def main(serial:str, label:str, otp:str, money:float):
 
     device_id = devices[0].device_id
 
-    api_key = get_api_key_from_env("BIGMODEL_API_KEY")  # 推荐用环境变量
+    # api_key = get_api_key_from_env("BIGMODEL_API_KEY")  # 推荐用环境变量
+    api_key = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
     glm = GLMVisionClient(api_key=api_key, model="glm-4.6v")
 
     dev = DeviceOps(device_factory, device_id)
