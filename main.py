@@ -59,7 +59,7 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
                 pass
             elif taskName == "finance":
                 pass
-            elif taskName == "square":
+            elif taskName == "square" or taskName == "":
                 prompt.task_browse_square(llvmAgent)
             ClientLogWriter(f"随机选择事件: {taskName}")
             return
