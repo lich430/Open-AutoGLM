@@ -1,5 +1,4 @@
 from datetime import datetime
-from buy_order import CoinOrder
 import uiautomator2 as u2
 import urllib.request
 import json
