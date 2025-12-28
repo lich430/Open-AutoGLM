@@ -11,7 +11,7 @@ import requests
 import re
 
 def task_switch_to_exchange(runner: AutoGLMRunner):
-    prompt = """当前操作的是币安APP 如果页面"顶部"有两个按钮分别是"交易平台和钱包"，如果交易平台是被选中的白色背景那就什么也不做，否则就点击交易平台按钮，最多操作1步后就立即结束任务"""
+    prompt = """当前操作的是币安APP 1:如果页面"顶部"有两个按钮分别是"交易平台和钱包"，如果交易平台是被选中的白色背景那就什么也不做，否则就点击交易平台按钮，最多操作1步后就立即结束任务"""
     runner.run(prompt)
 
 # 返回首页：
@@ -19,8 +19,6 @@ def task_return_homepage(runner: AutoGLMRunner):
 
     prompt = """当前操作的是币安APP 1:如果页面有底部导航栏：首页、行情、交易、合约、资产，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化。 2: 如果页面下方没有导航栏且的左上角有返回箭头或者右上角有关闭按钮(X形状)，点击返回箭头或则关闭按钮重复该操直到页面出现了导航栏，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化"""
     runner.run(prompt)
-
-    task_switch_to_exchange(runner)
 
 
 # 进入alpha交易，具体的操作如下：
@@ -31,31 +29,18 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
     if not symbol:
         raise ValueError("symbol 不能为空，例如 'ARTX'")
 
-    prompt = f"""进入币安的首页, 点击页面底部导航栏的行情菜单进入行情页，在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，,搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面，在K线页面的右下角你会发现一个黄色交易按钮位置大概在左上角(55,315),右下角(324,353)大概这个矩形，点击交易按钮进入alpha交易页面"""
+    prompt = f"""当前操作的是币安APP  1: 点击页面底部导航栏的行情菜单进入行情页 2:在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面 3:在K线页面的右下角你会发现一个黄色交易按钮位置大概在左上角(55,315),右下角(324,353)大概这个矩形，点击交易按钮进入alpha交易页面"""
     runner.run(prompt)
 
 # 重置alpha交易页面设置:
 def task_reset_alpha_trade_page(runner: AutoGLMRunner):
-    prompt = """当前页面是币安app的alpah交易的页面  1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
+    prompt = """当前页面是币安app  1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
     runner.run(prompt)
 
 
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
-    prompt = """当前是币安app的alpha交易页面,1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
-    runner.run(prompt)
-
-
-# 点击alpha交易页面的组件：
-def task_click_alpha_controls(runner: AutoGLMRunner):
-    prompt = """进入币安app，在当前alpla交易页面点击以下几处位置1：点击价格输入框，2：点击总额(USDT)输入框，3：点击卖出价格输入框，4：点击页面偏下方的的买入 XXX的按钮， 5：点击右下角输入法的完成按钮"""
-    runner.run(prompt)
-
-
-
-# 获取alpha交易页面最新价格
-def task_get_alpha_latest_price(runner: AutoGLMRunner):
-    prompt = """进入币安app,在当前alpha交易页面获取最新价格，页面的右侧有一个订单薄，订单薄的从上到下的顺序第一个价格就是最新价格， 请在最新价格的前后分别加上######。"""
+    prompt = """当前是币安app  1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
     runner.run(prompt)
 
 
@@ -200,10 +185,6 @@ def main():
     # task_reset_alpha_trade_page(runner)
     # task_cancel_alpha_orders(runner)
     # task_place_alpha_buy_order(runner,"RLS")
-
-    # # 获取alpha交易页面的数据
-    # task_get_alpha_latest_price(runner)
-    # task_click_alpha_controls(runner)
 
 
     # # 进入合约页面
