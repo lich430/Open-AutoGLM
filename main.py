@@ -133,4 +133,4 @@ def main(serial:str, label:str, otp:str, money:float):
         time.sleep(2)
 
 if __name__ == "__main__":
-    main("", "KOGE|1", "", 40)
+    main("", "KOGE|1", "", 100)
