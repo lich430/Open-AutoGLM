@@ -14,6 +14,7 @@ StabilityServiceUrl = "http://118.31.111.114:8080/stability_feed_v2.json"
 LastCoinName = ""
 CounterOfCoinRequest = 0
 MaxRequest = 3
+BinanceApp = "com.binance.dev"
 
 def GetStabilityCoinNameRequest():
     with urllib.request.urlopen(StabilityServiceUrl) as response:
@@ -109,6 +110,11 @@ def main(serial:str, label:str, otp:str, money:float):
         raise RuntimeError("No devices detected")
 
     device_id = devices[0].device_id
+    if device_id != serial:
+        ClientLogWriter("手机不识别")
+        time.sleep(90)
+        return
+    device_factory.launch_app(BinanceApp, device_id)
 
     # api_key = get_api_key_from_env("BIGMODEL_API_KEY")  # 推荐用环境变量
     api_key = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
