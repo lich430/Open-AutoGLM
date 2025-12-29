@@ -77,7 +77,7 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
         #prompt.task_reset_alpha_trade_page(llvmAgent)
         LastCoinName = coinName
 
-    prompt.task_cancel_alpha_orders(llvmAgent)
+    # prompt.task_cancel_alpha_orders(llvmAgent)
 
     result = bot.alpha_trade(coinName, buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
     print("DONE:", result)
