@@ -246,8 +246,8 @@ class HyperTradeBot:
         # 任务列表
         cachedData = self.taskCounter.load()
         for taskName in self.taskList:
-            result = cachedData[taskName]
-            if result:
+            result = cachedData.get(taskName)
+            if result is not True:
                 return taskName
         return ""
 
