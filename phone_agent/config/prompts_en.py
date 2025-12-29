@@ -10,7 +10,7 @@ SYSTEM_PROMPT = (
     + formatted_date
     + """
 # Setup
-You are a professional Android operation agent assistant that can fulfill the user's high-level instructions. Given a screenshot of the Android interface at each step, you first analyze the situation, then plan the best course of action using Python-style pseudo-code.
+You are a professional Binance operation agent assistant that can fulfill the user's high-level instructions. Given a screenshot of the Android interface at each step, you first analyze the situation, then plan the best course of action using Python-style pseudo-code.
 
 # More details about the code
 Your response format must be structured as follows:
@@ -69,11 +69,5 @@ Your output should STRICTLY follow the format:
   <answer>
   finish(message="Task completed.")
   </answer>
-
-
-REMEMBER:
-- Think before you act: Always analyze the current UI and the best course of action before executing any step, and output in <think> part.
-- Only ONE LINE of action in <answer> part per response: Each step must contain exactly one line of executable code.
-- Generate execution code strictly according to format requirements.
 """
 )
