@@ -74,7 +74,7 @@ def PlayDealTask(bot: HyperTradeBot, llvmAgent: AutoGLMRunner):
     # 如果最新的代币和上次选择的的不一样，就需要重新进入交易页面, todo:或者直接在交易页面切换币种
     if LastCoinName != coinName:
         prompt.task_enter_alpha_trade(llvmAgent, coinName)
-        prompt.task_reset_alpha_trade_page(llvmAgent)
+        #prompt.task_reset_alpha_trade_page(llvmAgent)
         LastCoinName = coinName
 
     prompt.task_cancel_alpha_orders(llvmAgent)
@@ -133,4 +133,4 @@ def main(serial:str, label:str, otp:str, money:float):
         time.sleep(2)
 
 if __name__ == "__main__":
-    main("", "KOGE|1", "", 10)
+    main("", "KOGE|1", "", 40)

@@ -10,14 +10,15 @@ from typing import Optional, Tuple
 import requests
 import re
 
-def task_switch_to_exchange(runner: AutoGLMRunner):
-    prompt = """当前操作的是币安APP 1:如果页面"顶部"有两个按钮分别是"交易平台和钱包"，如果交易平台是被选中的白色背景那就什么也不做，否则就点击交易平台按钮，最多操作1步后就立即结束任务"""
-    runner.run(prompt)
 
 # 返回首页：
 def task_return_homepage(runner: AutoGLMRunner):
-
-    prompt = """当前操作的是币安APP 1:如果页面有底部导航栏：首页、行情、交易、合约、资产，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化。 2: 如果页面下方没有导航栏且的左上角有返回箭头或者右上角有关闭按钮(X形状)，点击返回箭头或则关闭按钮重复该操直到页面出现了导航栏，点击导航栏的首页选项，点击一次后立即结束任务不用管页面是否变化"""
+    # print(get_nav_home_center_hyper())
+    # point = get_nav_home_center_hyper()
+    # if point[0] != 0:
+    #     prompt = f"""点击位置{point}"""
+    #     runner.run(prompt)
+    prompt = """打开币安APP. 如果页面底部有导航栏（通常在APP首页底部会有"首页"、"行情"、"交易"、"合约"、"资产"等导航按钮）点击导航栏首页选项，如果页面底部没有导航栏返回上一步"""
     runner.run(prompt)
 
 
@@ -29,18 +30,20 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
     if not symbol:
         raise ValueError("symbol 不能为空，例如 'ARTX'")
 
-    prompt = f"""当前操作的是币安APP  1: 点击页面底部导航栏的行情菜单进入行情页 2:在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面 3:在K线页面的右下角你会发现一个黄色交易按钮位置大概在左上角(55,315),右下角(324,353)大概这个矩形，点击交易按钮进入alpha交易页面"""
+    prompt = f"""1. 点击页面底部导航栏的行情菜单进入行情页 2. 在行情页的最上方有个搜索框，在搜索框中搜索{symbol} 3. 如果输入框下方的历史记录有{symbol}，就点击它 4. 搜索结果会有多个分类，选择Alpha那个分类 5. 点击进入K线页面 6. 在K线页面的右下角，点击一个黄色交易按钮"""
+    #prompt = f"""当前操作的是币安APP  1: 点击页面底部导航栏的行情菜单进入行情页 2:在行情页的最上方有个搜索框请你在搜索框中搜索{symbol}，如果输入框下方的历史记录有{symbol}你就直接点击就好了，不需要输入{symbol}，搜索的结果会有多个分类，你选择alpha那个分类，并点击进入K线页面 3:在K线页面的右下角你会发现一个黄色交易按钮位置大概在左上角(55,315),右下角(324,353)大概这个矩形，点击交易按钮进入alpha交易页面"""
     runner.run(prompt)
 
-# 重置alpha交易页面设置:
-def task_reset_alpha_trade_page(runner: AutoGLMRunner):
-    prompt = """当前页面是币安app  1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
-    runner.run(prompt)
+# # 重置alpha交易页面设置:
+# def task_reset_alpha_trade_page(runner: AutoGLMRunner):
+#     prompt = """1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
+#     runner.run(prompt)
 
 
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
-    prompt = """当前是币安app  1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
+    prompt = """1. 滑动一次，滑动 start 位置 [750,800]，end [750,550]，如果页面上有"当前委托"这四个字，就查看页面下方是否有委托的订单 2. 如果有委托的订单，逐个取消订单 3. 取消委托订单完成后，滑动 start [750,400]，end [750,850]"""
+    #prompt = """当前是币安app  1:滑动一次,滑动的start位置的[750,800],end[750,550]，如果页面上有 当前委托 这四个字，就查看页面下方是否有委托的订单。2：如果有委托的订单逐个取消订单。3:取消委托订单完成后,滑动的start[750,400]，end[750,850]。"""
     runner.run(prompt)
 
 
@@ -75,7 +78,7 @@ def task_watch_live(runner: AutoGLMRunner):
 def task_get_alpha_estimated_volume(runner):
     task_return_homepage(runner)
 
-    prompt = """当前是币安app 1:连续滑动三次start位置[750,850],end位置[750,300]，然后双击("action": "Double Tap")左下角的首页菜单。2:点击页面的上方的"Alpha活动"的图标，进入Alpha活动页后点击右上角的三个点的菜单会出现一个弹窗，然后继续点击弹窗上的刷新功能， 3.向上滑动1次页面，start位置的[750,850],end[750,300],然后结束任务"""
+    prompt = """1.当前是币安APP的页面,点击左上角的三条横杠的按钮进入用户中心 在用户中心页面你会看到"Alpha活动"图标，进入"Alpha活动"页面后点击右上角的三个点菜单会出现弹窗，然后点击弹窗上的刷新功能 完成刷新后向上滑动1次页面 start[750,850], end[750,300] 后结束任务"""
     runner.run(prompt)
 
     device_factory = get_device_factory()
@@ -87,6 +90,8 @@ def task_get_alpha_estimated_volume(runner):
     )
 
     print("today volume:", volume)
+
+    runner.run("执行2次返回操作(action:back)")
 
     return volume
 
@@ -163,6 +168,117 @@ def get_today_trade_volume(
 
     return (volume, raw_text) if return_raw else volume
 
+def extract_hyper_xy(model_text: str) -> tuple[int, int] | None:
+    """
+    从模型返回文本中提取 hyper(x,y)byte。
+    兼容：模型前后输出了额外字符、换行、引号、json 包裹等情况。
+    返回 (x,y) 或 None。
+    """
+    if not model_text:
+        return None
+
+    _HYPER_RE = re.compile(
+        r"hyper\s*\(\s*(\d{1,4})\s*,\s*(\d{1,4})\s*\)\s*byte",
+        re.IGNORECASE
+    )
+    # 1) 先直接 regex 抓 hyper(x,y)byte
+    m = _HYPER_RE.search(model_text)
+    if m:
+        x, y = int(m.group(1)), int(m.group(2))
+        return x, y
+
+    # 2) 如果模型把内容塞在 JSON 里（比如 {"result":"hyper(1,2)byte"}）
+    #    尝试提取 JSON 并再 regex
+    #    注意：这里“尽力而为”，避免因非严格 JSON 报错
+    try:
+        maybe_json = model_text.strip()
+        if maybe_json.startswith("{") and maybe_json.endswith("}"):
+            obj = json.loads(maybe_json)
+            # 常见字段名都试一下
+            for k in ("result", "text", "output", "content", "answer"):
+                if k in obj and isinstance(obj[k], str):
+                    m2 = _HYPER_RE.search(obj[k])
+                    if m2:
+                        return int(m2.group(1)), int(m2.group(2))
+    except Exception:
+        pass
+
+    return None
+
+
+def get_nav_home_center_hyper(
+    model: str = "glm-4.6v",
+    url: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    timeout_s: int = 60,
+) -> tuple[int, int]:
+
+    device_factory = get_device_factory()
+    device_id = device_factory.list_devices()[0].device_id
+
+    screenshot = device_factory.get_screenshot(device_id)
+
+    api_key = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    # prompt = (
+    #     "你是一个严格的坐标提取器。\n"
+    #     "任务：判断截图底部是否存在导航栏，且导航栏包含五个菜单："
+    #     "首页、行情、交易、合约、资产。\n"
+    #     "如果存在：输出【导航栏最左侧第一个菜单（首页）的中心点】坐标。\n"
+    #     "如果不存在：输出 (0,0)。\n\n"
+    #     "输出必须且只能是以下格式（不要任何多余字符/解释/换行）：\n"
+    #     "hyper(x,y)byte\n"
+    #     "其中 x,y 为 0~1000 的整数（相对整张图归一化坐标）。"
+    # )
+
+    prompt = """ 你分析下当前页面的内容 如果页面底部存在导航栏(通常在APP首页底部会有"首页"、"行情"、"交易"、"合约"、"资产"等导航按钮)则返回底部导航栏首页按钮的中心坐标位置,如果页面上没有导航栏返回(0,0)。请在返回结果前面加一个hyper后面加byte输出，例如:hyper(x,y)byte """
+
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "image_url", "image_url": {"url": screenshot.base64_data}},
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ],
+        "stream": False,
+        "thinking": {"type": "enabled", "clear_thinking": True},
+        "do_sample": True,
+        "temperature": 1,
+        "top_p": 0.95,
+        "tool_stream": False,
+        "response_format": {"type": "text"},
+    }
+
+    resp = requests.post(url, json=payload, headers=headers, timeout=timeout_s)
+    resp.raise_for_status()
+
+    raw_text = resp.text
+
+    # 解析 content
+    obj = json.loads(raw_text)
+    print(f"""obj:{obj}""")
+    content = obj["choices"][0]["message"]["content"]
+    print(f"""返回内容: {content}""")
+    if not isinstance(content, str):
+        raise RuntimeError(f"GLM content is not str: {type(content)}")
+
+    content = content.strip()
+
+    point = extract_hyper_xy(content)
+    if point[0] != 0:
+        x = int(point[0] / 1000 * screenshot.width)
+        y = int(point[1] / 1000 * screenshot.height)
+        device_factory.tap(x, y, device_id)
+
+    return point
+
 
 def task_spot_buy_bnb(runner):
     task_return_homepage(runner)
@@ -177,7 +293,7 @@ def main():
     # task_spot_buy_bnb(runner)
     # return
     #task_switch_to_exchange(runner)
-    #task_return_homepage(runner)
+    # task_return_homepage(runner)
 
     # # alpha交易相关的
     # #

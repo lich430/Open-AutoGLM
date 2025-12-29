@@ -54,12 +54,22 @@ def parse_trade_targets(resp_text: str) -> Optional[TradeTargets]:
     c3 = (int(coords[2][0]), int(coords[2][1]))
     c4 = (int(coords[3][0]), int(coords[3][1]))
 
-    m_avail = re.search(r",\s*([0-9]+(?:\.[0-9]+)?)\s*USDT\s*,", content, flags=re.IGNORECASE)
+    m_avail = re.search(
+        r",\s*([0-9]+(?:\.[0-9]+)?)\s*USDT\s*,",
+        content,
+        flags=re.IGNORECASE
+    )
+
     if not m_avail:
         return None
     available_usdt = float(m_avail.group(1))
 
-    m_price = re.search(r",\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*byte\s*$", content, flags=re.IGNORECASE)
+    m_price = re.search(
+        r",\s*\$?\s*([0-9]+(?:\.[0-9]+)?)\s*(?:USD|USDT)?\s*byte\s*$",
+        content,
+        flags=re.IGNORECASE
+    )
+
     if not m_price:
         return None
     coin_price_usd = float(m_price.group(1))
