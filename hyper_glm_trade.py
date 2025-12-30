@@ -292,18 +292,21 @@ class HyperTradeBot:
 
         # 1) 输入总金额
         self.dev.tap_rel_1000(*targets.total_usdt_input_center, sc.width, sc.height)
+        print("Debug:: 输入总金额:", str(available_amount))
         self.dev.clear_and_type(str(available_amount))
         time.sleep(step_sleep_s)
 
         # 2) 输入买入价格
         buy_price = coin_price * buy_markup
         self.dev.tap_rel_1000(*targets.price_input_center, sc.width, sc.height)
+        print("Debug:: 输入买入价格:", str(buy_price))
         self.dev.clear_and_type(str(buy_price))
         time.sleep(step_sleep_s)
 
         # 3) 输入卖出价格
         sell_price = coin_price * sell_discount
         self.dev.tap_rel_1000(*targets.sell_price_input_center, sc.width, sc.height)
+        print("Debug:: 输入卖出价格:", str(sell_price))
         self.dev.clear_and_type(str(sell_price))
         time.sleep(step_sleep_s)
 
