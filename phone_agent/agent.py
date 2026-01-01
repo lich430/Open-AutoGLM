@@ -299,5 +299,5 @@ class PhoneAgent:
             sign = -1 if random.getrandbits(1) else 1
             val *= sign
             val = round(val, 2)
-        # return val
-        return 0
+        return val
+        # return 0
