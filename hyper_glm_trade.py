@@ -8,6 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
 from task_counter import TaskCounter
+import random
 
 import requests
 
@@ -184,8 +185,8 @@ class DeviceOps:
 
     def tap_rel_1000(self, x_rel: float, y_rel: float, screen_w: int, screen_h: int):
         """把 0~1000 的相对坐标转换为像素点击（你原来的 tap 做的就是这个）"""
-        x = int(x_rel / 1000 * screen_w)
-        y = int(y_rel / 1000 * screen_h)
+        x = int(x_rel / 1000 * screen_w)  + random.randint(0, 999) * 0.001
+        y = int(y_rel / 1000 * screen_h)  + random.randint(0, 999) * 0.001
         self.device_factory.tap(x, y, self.device_id)
 
     def clear_and_type(self, text: str):
