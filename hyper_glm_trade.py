@@ -55,14 +55,14 @@ def parse_trade_targets(resp_text: str) -> Optional[TradeTargets]:
     c4 = (int(coords[3][0]), int(coords[3][1]))
 
     m_avail = re.search(
-        r",\s*([0-9]+(?:\.[0-9]+)?)\s*USDT\s*,",
+        r",\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*USDT\s*,",
         content,
         flags=re.IGNORECASE
     )
-
     if not m_avail:
         return None
-    available_usdt = float(m_avail.group(1))
+
+    available_usdt = float(m_avail.group(1).replace(",", ""))
 
     m_price = re.search(
         r",\s*\$?\s*([0-9]+(?:\.[0-9]+)?)\s*(?:USD|USDT)?\s*byte\s*$",
