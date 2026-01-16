@@ -13,6 +13,14 @@ import random
 import requests
 
 
+import hashlib
+def _sha1_text(s: str) -> str:
+    return hashlib.sha1(s.encode("utf-8")).hexdigest()
+
+def _sha1_bytes(b: bytes) -> str:
+    return hashlib.sha1(b).hexdigest()
+
+
 # ----------------------------
 # 1) 解析：页面六要素（4个点 + USDT + 币价）
 # ----------------------------
@@ -209,6 +217,11 @@ class HyperTradeBot:
         self.taskList = ("bnb", )
         self.taskCounter = TaskCounter(serial)
 
+        # ---- GLM 结果缓存（5分钟 TTL）----
+        # key -> (expire_ts, resp_text)
+        self._glm_cache: Dict[str, Tuple[float, str]] = {}
+        self._glm_cache_ttl_sec: float = 300.0
+
         # 用户自定义稳定币的陪数
         if label != "":
             ClientLogWriter("用户指定稳定币:" + label)
@@ -257,6 +270,34 @@ class HyperTradeBot:
         cachedData[taskName] = result
         self.taskCounter.safe_save(cachedData)
 
+    def _glm_cache_get(self, key: str) -> Optional[str]:
+        hit = self._glm_cache.get(key)
+        if not hit:
+            return None
+        expire_ts, resp_text = hit
+        if time.time() >= expire_ts:
+            # 过期则清理
+            self._glm_cache.pop(key, None)
+            return None
+        return resp_text
+
+    def _glm_cached_chat_image_text(self, cache_namespace: str, image_base64: str, prompt: str) -> Tuple[str, bool]:
+        """
+        返回 (resp_text, from_cache)
+        缓存 key = namespace + prompt_hash
+        """
+        prompt_hash = _sha1_text(prompt)
+        key = f"{cache_namespace}:{prompt_hash}"
+
+        cached = self._glm_cache_get(key)
+        if cached is not None:
+            return cached, True
+
+        resp_text = self.glm.chat_image_text(image_base64, prompt)
+        self._glm_cache[key] = (time.time() + self._glm_cache_ttl_sec, resp_text)
+        return resp_text, False
+
+
     def alpha_trade(
         self,
         coinName:str,
@@ -283,10 +324,23 @@ class HyperTradeBot:
             "要和示例的格式保持一致，这样方便我提取"
         )
 
-        resp_trade = self.glm.chat_image_text(sc.base64_data, prompt_trade)
+        print("截图完毕，开始使用AI分析图片")
+
+        t0 = time.perf_counter()
+        resp_trade, from_cache = self._glm_cached_chat_image_text(
+            "prompt_trade",
+            sc.base64_data,
+            prompt_trade
+        )
+        t1 = time.perf_counter()
+
+        print(f"glm.chat_image_text(prompt_trade)耗时: {(t1 - t0):.3f}s | cache={from_cache}")
+
         targets = parse_trade_targets(resp_trade)
         if targets is None:
             raise RuntimeError(f"parse_trade_targets failed. resp={resp_trade}")
+
+        print(f"targets:{targets}")
 
         coin_price = targets.coin_price_usd
         available_amount = round(targets.available_usdt * buy_ratio, 2)
@@ -318,7 +372,15 @@ class HyperTradeBot:
         # 5) 识别弹窗确认按钮并点击
         sc2 = self.dev.screenshot()
         prompt_confirm = "目前页面上出现了一个弹窗，请给出弹窗的下方黄色的确认按钮的中心位置的坐标"
-        resp_confirm = self.glm.chat_image_text(sc2.base64_data, prompt_confirm)
+        t0 = time.perf_counter()
+        resp_confirm, from_cache2 = self._glm_cached_chat_image_text(
+            "prompt_confirm",
+            sc2.base64_data,
+            prompt_confirm
+        )
+        t1 = time.perf_counter()
+        print(f"glm.chat_image_text(prompt_confirm)耗时: {(t1 - t0):.3f}s | cache={from_cache2}")
+
         confirm_xy = extract_confirm_button_xy(resp_confirm)
         if confirm_xy is None:
             raise RuntimeError(f"extract_confirm_button_xy failed. resp={resp_confirm}")

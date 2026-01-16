@@ -1,4 +1,5 @@
 # run_trade.py
+import time
 from phone_agent.device_factory import get_device_factory
 
 from hyper_glm_trade import DeviceOps, GLMVisionClient, HyperTradeBot, get_api_key_from_env
@@ -13,13 +14,22 @@ def main():
     device_id = devices[0].device_id
 
     api_key = get_api_key_from_env("BIGMODEL_API_KEY")  # 推荐用环境变量
-    glm = GLMVisionClient(api_key=api_key, model="glm-4.6v")
+    glm = GLMVisionClient(api_key=api_key, model="GLM-4.6V-FlashX")
 
     dev = DeviceOps(device_factory, device_id)
     bot = HyperTradeBot(device_id, "", 100, glm, dev)
 
-    result = bot.alpha_trade("ESPORTS", buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
-    print("DONE:", result)
+    for i in range(3):
+        print(f"\n=== Run {i + 1}/3 ===")
+        result = bot.alpha_trade("LISA", buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
+        print("DONE:", result)
+
+        # 前两次执行完等 8 秒，最后一次不需要再等
+        if i < 2:
+            time.sleep(8)
+
+    # result = bot.alpha_trade("LISA", buy_ratio=0.95, buy_markup=1.03, sell_discount=0.97)
+    # print("DONE:", result)
 
 
 if __name__ == "__main__":

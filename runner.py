@@ -20,7 +20,7 @@ class RunnerConfig:
     api_key: str = "d02cf9e65048471d92c4fd840a280934.OCIg95VIrqTnKboe"
     model: str = "autoglm-phone"
     lang: str = "cn"
-    max_steps: int = 8
+    max_steps: int = 20
     verbose: bool = True
 
 

@@ -3,6 +3,7 @@
 
 from runner import AutoGLMRunner
 from phone_agent.device_factory import get_device_factory
+from decimal import Decimal, ROUND_DOWN
 import json
 import re
 from typing import Optional, Tuple
@@ -38,7 +39,6 @@ def task_enter_alpha_trade(runner: AutoGLMRunner, symbol: str):
 # def task_reset_alpha_trade_page(runner: AutoGLMRunner):
 #     prompt = """1：交易模式选择限价模式，在页面的偏上的位置，你会发现有限价和即时两个并排在一起的标签，如果即时处于被选中状态（白色背景）就点击左边的限价，如果限价是被选中状态（白色背景）那就什么也不做。2：交易方向选择买入，在页面的偏上的位置，你会发现有买入行和卖出行两个并排在一起的按钮一左一右，如果买入行按钮是(绿色高亮)的说明已经是买入模式就什么也不做，如果卖出行按钮是(红色高亮)的就意味当前是是卖出模式,需要点击左边的买入"""
 #     runner.run(prompt)
-
 
 # 取消alpha订单：
 def task_cancel_alpha_orders(runner: AutoGLMRunner):
@@ -309,8 +309,10 @@ def main():
     # # 逛广场
     #task_browse_square(runner)
 
-    volume = task_get_alpha_estimated_volume(runner)
-    print(f"volume:{volume}")
+    task_trade_alper(runner)
+
+    # volume = task_get_alpha_estimated_volume(runner)
+    # print(f"volume:{volume}")
 
     # #看直播
     #task_watch_live(runner)
